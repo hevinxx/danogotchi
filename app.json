@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "danogochi",
-    "slug": "danogochi",
+    "name": "danogotchi",
+    "slug": "danogotchi",
     "privacy": "public",
     "sdkVersion": "35.0.0",
     "platforms": [
