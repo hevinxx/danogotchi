@@ -137,17 +137,27 @@ class StateProvider extends Component {
     return Math.max(Math.floor(Math.random() * Constants.MAX_DISTANCE), Constants.FIND_ITEM_DISTANCE + 10)
   }
 
-  // 일정 시간마다 setThirsty를 호출한다.
+  // TODO : 처음 호출 하는 곳이 없다.
+  desireItem() {
+    this.desireInterval = setInterval(() => {
+      if (!this.state.isDesiringItem) {
+        this.setState({ isDesiringItem: true })
+      }
+    }, Constants.GETTING_THIRSTY_MILLISECONDS)
+  }
+
+  // TODO : 처음 호출 하는 곳이 없다..
   becomeThirsty() {
     this.drinkInterval = setInterval(() => {
       this.setThirsty()
-    }, Constants.GETTING_THIRSTY_MILLISECONDS)
+    }, Constants.GET_THIRSTY_MILLISECONDS)
   }
 
   // 일정 확률로 목 마른 상태로 만든다.
   setThirsty() {
     const x = Math.random()
-    if (x <= Constants.CHANCE_TO_GET_THIRSTY) {
+    if (x <= Constants.CHANCE_TO_GET_THIRSTY
+      && !!this.state.isThirsty) {
       this.setState({ isThirsty: true }, () => {
         // TODO : 목 말라요
         this.setMessage("")
