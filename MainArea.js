@@ -12,10 +12,74 @@ import {
   CHARACTER_STATE_DEFAULT,
   CHARACTER_STATE_WALKING,
   CHARACTER_STATE_DESIRING,
-  CHARACTER_STATE_THIRSTY,
+  CHARACTER_STATE_WANT,
   CHARACTER_STATE_EVOLVING,
-  CHARACTER_STATE_HAPPY
+  CHARACTER_STATE_HAPPY,
+  CHARACTER_STATE_FINDING,
+  CHARACTER_STATE_DRINKING,
+  THRESHOLD_BETTER,
+  THRESHOLD_BEST
 } from "./Constants";
+
+const getSpriteIndex = (character, state) => {
+  let startIndex = 0;
+  if (growthStage > THRESHOLD_BEST) {
+    if (state.CHARACTER_STATE_DEFAULT === CHARACTER_STATE_DEFAULT) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_WALKING === CHARACTER_STATE_WALKING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_DESIRING === CHARACTER_STATE_DESIRING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_WANT === CHARACTER_STATE_WANT) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_EVOLVING === CHARACTER_STATE_EVOLVING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_HAPPY === CHARACTER_STATE_HAPPY) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_FINDING === CHARACTER_STATE_FINDING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_DRINKING === CHARACTER_STATE_DRINKING) {
+      startIndex = 8;
+    }
+  } else if (growthStage > THRESHOLD_BETTER) {
+    if (state.CHARACTER_STATE_DEFAULT === CHARACTER_STATE_DEFAULT) {
+      startIndex = 32;
+    } else if (state.CHARACTER_STATE_WALKING === CHARACTER_STATE_WALKING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_DESIRING === CHARACTER_STATE_DESIRING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_WANT === CHARACTER_STATE_WANT) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_EVOLVING === CHARACTER_STATE_EVOLVING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_HAPPY === CHARACTER_STATE_HAPPY) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_FINDING === CHARACTER_STATE_FINDING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_DRINKING === CHARACTER_STATE_DRINKING) {
+      startIndex = 8;
+    } else {
+    }
+  } else {
+    if (state.CHARACTER_STATE_DEFAULT === CHARACTER_STATE_DEFAULT) {
+      startIndex = 64;
+    } else if (state.CHARACTER_STATE_WALKING === CHARACTER_STATE_WALKING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_DESIRING === CHARACTER_STATE_DESIRING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_WANT === CHARACTER_STATE_WANT) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_EVOLVING === CHARACTER_STATE_EVOLVING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_HAPPY === CHARACTER_STATE_HAPPY) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_FINDING === CHARACTER_STATE_FINDING) {
+      startIndex = 8;
+    } else if (state.CHARACTER_STATE_DRINKING === CHARACTER_STATE_DRINKING) {
+      startIndex = 8;
+    }
+  }
+};
 
 class MainArea extends Component {
   state = {
@@ -82,7 +146,7 @@ class MainArea extends Component {
   };
 
   render() {
-    const { characterState } = this.state;
+    const { characterState, character } = this.state;
 
     return (
       <View style={styles.mainArea}>
@@ -106,7 +170,7 @@ class MainArea extends Component {
               ref={ref => (this.character = ref)}
               source={require("./assets/danogotchi_character2.png")}
               columns={4}
-              rows={4}
+              rows={18}
               animations={{
                 // egg: [0, 1, 2, 3],
                 [CHARACTER_STATE_DEFAULT]: [4, 5, 6, 7],
