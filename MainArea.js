@@ -9,6 +9,14 @@ import {
 } from "react-native";
 import SpriteSheet from "rn-sprite-sheet";
 import { withState } from "./StateContext";
+import {
+  CHARACTER_STATE_DEFAULT,
+  CHARACTER_STATE_WALKING,
+  CHARACTER_STATE_DESIRING,
+  CHARACTER_STATE_THIRSTY,
+  CHARACTER_STATE_EVOLVING,
+  CHARACTER_STATE_HAPPY
+} from "./Constants";
 
 class MainArea extends Component {
   state = {
@@ -34,12 +42,10 @@ class MainArea extends Component {
     };
   };
 
-  componentDidMount = () => {
-    this.eggAction();
-  };
+  componentDidMount = () => {};
 
   componentDidUpdate = (prevProps, prevState) => {
-    if (this.state.characterState === "walk") {
+    if (this.state.characterState === CHARACTER_STATE_WALKING) {
       this.animate = Animated.loop(
         Animated.timing(this.state.bgPos, {
           duration: 12000,
@@ -51,11 +57,9 @@ class MainArea extends Component {
       this.play(this.state.characterState, { onFinish: this.defaultAction });
       return;
     }
-    if (this.state.characterState === "default") {
+    if (this.state.characterState === CHARACTER_STATE_DEFAULT) {
       this.play(this.state.characterState, { onFinish: this.defaultAction });
       this.animate.stop();
-      // this.setState({ bgPos: new Animated.Value(this.state.bgPos._value) });
-      // this.state.bgPos.setOffset(this.state.bgPos._value);
       return;
     }
     // if (this.state.characterState) {
@@ -74,20 +78,17 @@ class MainArea extends Component {
     });
   };
 
-  eggAction = () => {
-    this.play("egg", { loop: true });
-  };
-
   defaultAction = () => {
-    this.play("default", { loop: true });
+    this.play(CHARACTER_STATE_DEFAULT, { loop: true });
   };
 
   render() {
     const { characterState } = this.state;
-    console.log(this.state);
+
     return (
       <View style={styles.mainArea}>
-        {characterState === "walk" || characterState === "default" ? (
+        {characterState === CHARACTER_STATE_WALKING ||
+        characterState === CHARACTER_STATE_DEFAULT ? (
           <Animated.View
             style={{
               left: this.state.bgPos
@@ -108,11 +109,11 @@ class MainArea extends Component {
               columns={4}
               rows={4}
               animations={{
-                egg: [0, 1, 2, 3],
-                default: [4, 5, 6, 7],
-                walk: [4, 5, 6, 7],
-                thirsty: [8, 9, 10, 11],
-                revolution: [12, 13, 14, 15]
+                // egg: [0, 1, 2, 3],
+                [CHARACTER_STATE_DEFAULT]: [4, 5, 6, 7],
+                [CHARACTER_STATE_WALKING]: [4, 5, 6, 7],
+                [CHARACTER_STATE_THIRSTY]: [8, 9, 10, 11],
+                [CHARACTER_STATE_EVOLVING]: [12, 13, 14, 15]
               }}
             />
           </View>

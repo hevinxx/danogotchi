@@ -1,20 +1,11 @@
 import React, { Component } from "react";
-import {
-  StyleSheet,
-  SafeAreaView,
-  View,
-  Button,
-  TextInput,
-  Switch,
-  Text,
-  KeyboardAvoidingView
-} from "react-native";
+import { Image, StyleSheet, View, Text } from "react-native";
 
 class DescriptionArea extends Component {
   render() {
     return (
       <View style={styles.descriptionArea}>
-        <Text>설명</Text>
+        <Image source={require("./assets/black_box.png")} />
       </View>
     );
   }
@@ -22,12 +13,12 @@ class DescriptionArea extends Component {
 
 const styles = StyleSheet.create({
   descriptionArea: {
-    height: "10%",
+    height: "100%",
     width: "100%",
-    position: "absolute",
-    backgroundColor: "#eee",
+    top: 0,
     bottom: 0,
-    zIndex: 2
+    position: "absolute",
+    bottom: 0
   }
 });
 
