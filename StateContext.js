@@ -12,7 +12,6 @@ class StateProvider extends Component {
     
     const growthStages = [0, Constants.THRESHOLD_BETTER, Constants.THRESHOLD_BEST];
     this.state = {
-      characterState: Constants.CHARACTER_STATE_DEFAULT,
       // 0: good, 1: better, 2: best
       growthStage: 0,
       /**
@@ -45,8 +44,9 @@ class StateProvider extends Component {
       isEvolving: false,
 
       isHappy: false,
+
+      message: "",
       // TODO : 말풍선
-      // TODO : 상태 메시지
     };
 
     this.actions = {
@@ -104,7 +104,6 @@ class StateProvider extends Component {
 
     const dStep = step - this.state.previousStep
     const distanceToItem = Math.max(this.state.distanceToItem - dStep, Constants.FIND_ITEM_DISTANCE)
-    const prevIsWalking = this.state.isWalking
 
     this.setState({ 
       distanceToItem: distanceToItem,
@@ -113,8 +112,6 @@ class StateProvider extends Component {
     }, () => {
       // 타이머를 설정한다.
       this.setStopWalkingTimer()
-      // 걷지 않는 상태에서 걷는 상태가 되었을 시 애니메이션을 호출한다.
-      prevIsWalking || this.setCharacterState()
       // 아이템과의 거리가 FIND_ITEM_DISTANCE 보다 가까워졌을 시 findItem을 실행한다.
       distanceToItem <= Constants.FIND_ITEM_DISTANCE && this.findItem()
     })
@@ -123,10 +120,7 @@ class StateProvider extends Component {
   // 걸었다는 신호가 들어온 뒤 WALKING_STOPPER_MILLISECONDS가 지나면 걷지 않는 상태로 만든다.
   setStopWalkingTimer() {
     this.walkingStopper = setTimeout(() => {
-      this.setState({ isWalking: false }, () => {
-        // 걷지 않는 상태로 만들었으면 애니메이션을 호출한다.
-        this.setCharacterState()
-      })
+      this.setState({ isWalking: false })
       this.walkingStopper = 0
     }, Constants.WALKING_STOPPER_MILLISECONDS)
   }
@@ -155,21 +149,21 @@ class StateProvider extends Component {
     const x = Math.random()
     if (x <= Constants.CHANCE_TO_GET_THIRSTY) {
       this.setState({ isThirsty: true }, () => {
-        this.setCharacterState()
+        // TODO : 목 말라요
+        this.setMessage("")
       })
     }
   }
 
   drink() {
     this.setState({ isThirsty: false}, () => {
-      this.setCharacterState()
+      // TODO : 너도 마실래?
+      this.setMessage("")
     })
   }
 
   findItem() {
-    this.setState({ isFinding: true }, () => {
-      this.setCharacterState()
-    })
+    this.setState({ isFinding: true })
   }
 
   pickUpItem() {
@@ -177,7 +171,8 @@ class StateProvider extends Component {
       isFinding: false,
       isHappy: true
     }, () => {
-      this.setCharacterState()
+      // TODO : 아이템을 얻었다!
+      this.setMessage("")
     })
     this.setNextItem()
     this.earnLovePoint()
@@ -185,9 +180,7 @@ class StateProvider extends Component {
 
   // TODO: 행복해 하는 게 끝나면 불려야 한다.
   completeHappy() {
-    this.setState({ isHappy: false }, () => {
-      this.setCharacterState()
-    })
+    this.setState({ isHappy: false })
   }
 
   // 캐릭터의 상태와는 별개로, 다음 아이템은 항상 정해져 있다.
@@ -221,19 +214,18 @@ class StateProvider extends Component {
       growthStage: Math.min(prevState.growthStage + 1, growthStages.length),
       isEvolving: true
     }), () => {
-      this.setCharacterState()
+      // TODO : 진화했다!
+      this.setMessage("")
     })
   }
 
   // TODO : 진화가 끝났으면 불려야 한다.
   completeEvolve() {
-    this.setState({ isEvolving: false }, () => {
-      this.setCharacterState()
-    })
+    this.setState({ isEvolving: false })
   }
 
-  setCharacterState() {
-    // TODO
+  setMessage(message) {
+    this.setState({ message: message})
   }
 
   render() {
