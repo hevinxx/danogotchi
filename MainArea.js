@@ -117,8 +117,6 @@ class MainArea extends Component {
       getAnimationName(this.state.growthStage, this.state.characterState),
       { loop: true }
     );
-    console.log(this.state.growthStage);
-    console.log(this.state.characterState);
     // if (this.state.characterState === CHARACTER_STATE_WALKING) {
     //   this.animate = Animated.loop(
     //     Animated.timing(this.state.bgPos, {
@@ -190,10 +188,11 @@ class MainArea extends Component {
             <SpriteSheet
               style={styles.character}
               ref={ref => (this.character = ref)}
-              source={require("./assets/danogotchi_character2.png")}
+              source={require("./assets/danogotchi_character_last.png")}
               columns={4}
               rows={18}
               animations={{
+                test: [8, 9, 10, 11],
                 [getAnimationName(
                   0,
                   CHARACTER_STATE_DEFAULT
@@ -351,7 +350,7 @@ const styles = StyleSheet.create({
     display: "flex",
     alignItems: "center",
     marginTop: "auto",
-    marginBottom: "50%"
+    marginBottom: "30%"
   },
   character: {}
 });

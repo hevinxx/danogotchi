@@ -25,15 +25,6 @@ const getCharacterState = state => {
   }
 };
 class MainView extends React.Component {
-  state = {
-    character: "basic",
-    characterState: "" // walk, find, desire, thirsty
-  };
-
-  componentDidMount() {
-    this.props.homeProvider.state;
-  }
-
   render = () => {
     const characterState = getCharacterState(this.props.homeProvider.state);
 
@@ -41,32 +32,7 @@ class MainView extends React.Component {
       <View style={{ flex: 1 }}>
         <View
           style={{ width: 100, top: 100, position: "absolute", zIndex: 10 }}
-        >
-          <Button
-            onPress={() =>
-              this.setState({
-                characterState: Constants.CHARACTER_STATE_WALKING
-              })
-            }
-            title="Test1"
-          ></Button>
-          <Button
-            onPress={() =>
-              this.setState({
-                characterState: Constants.CHARACTER_STATE_DEFAULT
-              })
-            }
-            title="Test2"
-          ></Button>
-          <Button
-            onPress={() =>
-              this.setState({
-                characterState: Constants.qCHARACTER_STATE_EVOLVING
-              })
-            }
-            title="Test3"
-          ></Button>
-        </View>
+        ></View>
         <MainArea
           growthStage={this.props.homeProvider.state.growthStage}
           characterState={characterState}
