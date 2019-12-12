@@ -38,8 +38,6 @@ class StateProvider extends Component {
       isDesiringItem: false,
       desiredItemId: null,
       distanceToItem: 100,
-      // 시연을 위해 100을 상수로 넣겠다.
-      lovePointToIncrease: 100,
  
       isThirsty: false,
       isDrinking: false,
@@ -159,7 +157,7 @@ class StateProvider extends Component {
   hatch() {
     this.setState({ hatchingLevel: Constants.HATCHING }, () => {
       setTimeout(() => {
-        this.setState({ hatchingLevel: Constants.BORN })
+        this.setState({ hatchingLevel: Constants.BORN }, this.becomeThirsty())
       }, Constants.HATCHING_MILLISECONDS)
     })
   }
@@ -209,6 +207,7 @@ class StateProvider extends Component {
       isDrinking: true,
       isThirsty: false
     }, () => {
+      this.earnLovePoint(this.generateEarningPoint())
       this.setStopDrinkingTimer()
       // TODO : 너도 마실래?
       this.setMessage("")
@@ -235,7 +234,7 @@ class StateProvider extends Component {
       this.setMessage("")
     })
     this.setNextItem()
-    this.earnLovePoint()
+    this.earnLovePoint(this.generateEarningPoint())
   }
 
   setHappyStopper() {
@@ -254,10 +253,17 @@ class StateProvider extends Component {
     })
   }
 
-  earnLovePoint() {
-    const lovePoint = this.state.lovePoint + this.state.lovePointToIncrease
-    const prevStage = this.state.growthStage
-    this.setState({ lovePoint: lovePoint })
+  earnLovePoint(point) {
+    const lovePoint = this.state.lovePoint + point
+    const threshold = this.growthStages[this.state.growthStage]
+    this.setState({ lovePoint: lovePoint }, () => {
+      if (lovePoint >= threshold) this.evolve()
+    })
+  }
+
+  generateEarningPoint() {
+    // 시연을 위해 100으로 고정한다
+    return 100
   }
 
   evolve() {
@@ -273,7 +279,10 @@ class StateProvider extends Component {
 
   setStopEvolvingTimer() {
     setTimeout(() => {
-      this.setState({ isEvolving: false })
+      this.setState({ isEvolving: false }, () => {
+        // 시연용으로 better 이상에서만
+        if (this.state.growthStage > 0) this.desireItem()
+      })
     }, Constants.EVOLVE_STOPPER_MILLISECONDS)
   }
 
