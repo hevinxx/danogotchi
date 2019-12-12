@@ -10,7 +10,7 @@ class App extends React.Component {
   };
   componentDidMount = async () => {
     await Font.loadAsync({
-      PressStart2P: require("./assets/PressStart2P.ttf")
+      DungGeunMo: require("./assets/DungGeunMo.ttf")
     });
 
     this.setState({ isFontLoaded: true });

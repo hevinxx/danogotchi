@@ -59,7 +59,8 @@ class StateProvider extends Component {
       desireItem: this.desireItem,
       pickUpItem: this.pickUpItem,
       becomeThirsty: this.becomeThirsty,
-      evolve: this.evolve
+      evolve: this.evolve,
+      happy: this.happy
     };
   }
 
@@ -95,11 +96,15 @@ class StateProvider extends Component {
     this.pedometerSubscription = null;
   };
 
+  happy = () => {
+    this.setState({ isHappy: true }, this.setHappyStopper);
+  };
+
   /**
    * 걷는 상태로 만든다.
    * 타이머를 두어 일정 시간이 지난 뒤 다시 걷지 않는 상태로 만든다.
    */
-  walk(step) {
+  walk = step => {
     // 시연을 위해 better 단계 이상에서만.
     if (this.state.hatchingLevel != Constants.BORN) return;
     if (this.state.growthStage < 1) return;
@@ -143,102 +148,106 @@ class StateProvider extends Component {
       // 아이템과의 거리가 FIND_ITEM_DISTANCE 보다 가까워졌을 시 findItem을 실행한다.
       distanceToItem <= Constants.FIND_ITEM_DISTANCE && this.findItem();
     });
-  }
+  };
 
   // 걸었다는 신호가 들어온 뒤 WALKING_STOPPER_MILLISECONDS가 지나면 걷지 않는 상태로 만든다.
-  setStopWalkingTimer() {
-    setTimeout(() => {
+  setStopWalkingTimer = () => {
+    if (this.walkTimer) clearTimeout(this.walkTimer);
+    this.walkTimer = setTimeout(() => {
       this.setState({ isWalking: false });
     }, Constants.WALKING_STOPPER_MILLISECONDS);
-  }
+  };
 
-  clearStopWalkingTimer() {
+  clearStopWalkingTimer = () => {
     if (this.walkingStopper) {
       clearTimeout(this.walkingStopper);
       this.walkingStopper = 0;
     }
-  }
+  };
 
   // 다음 아이템과의 거리를 결정한다.
-  generateNextDistance() {
+  generateNextDistance = () => {
     return Math.max(
       Math.floor(Math.random() * Constants.MAX_DISTANCE),
       Constants.FIND_ITEM_DISTANCE + 10
     );
-  }
+  };
 
   hatch = () => {
     this.setState({ hatchingLevel: Constants.HATCHING }, () => {
       setTimeout(() => {
-        this.setState({ hatchingLevel: Constants.BORN }, this.becomeThirsty());
+        this.setState({ hatchingLevel: Constants.BORN }, this.becomeThirsty);
       }, Constants.HATCHING_MILLISECONDS);
     });
   };
 
-  desireItem() {
+  desireItem = () => {
     this.desireInterval = setInterval(() => {
       if (!this.state.isDesiringItem) {
         // 시연을 위해 better, best 단계에서만
         if (this.state.growthStage != 0) this.setDesiringItemRandomly();
       }
-    }, Constants.GETTING_THIRSTY_MILLISECONDS);
-  }
+    }, Constants.GET_THIRSTY_MILLISECONDS);
+  };
 
   // 일정 확률로 아이템을 원하는 상태로 만든다.
-  setDesiringItemRandomly() {
+  setDesiringItemRandomly = () => {
     const x = Math.random();
-    if (x <= Constants.CHANCE_TO_GET_DESIRING && !!this.state.isDesiringItem) {
+    if (x <= Constants.CHANCE_TO_GET_DESIRING && !this.state.isDesiringItem) {
       this.setState({ isDesiringItem: true }, () => {
         // TODO : 아이템 필요해요.
         this.setMessage("");
       });
     }
-  }
+  };
 
-  becomeThirsty() {
+  becomeThirsty = () => {
     this.drinkInterval = setInterval(() => {
       // 시연을 위해 good 단계에서만
-      if (this.state.growthStage == 0) this.setThirstyRandomly();
+      if (this.state.growthStage == 0) {
+        console.log("qqqq");
+        this.setThirstyRandomly();
+      }
     }, Constants.GET_THIRSTY_MILLISECONDS);
-  }
+  };
 
   // 일정 확률로 목 마른 상태로 만든다.
-  setThirstyRandomly() {
+  setThirstyRandomly = () => {
     const x = Math.random();
-    if (x <= Constants.CHANCE_TO_GET_THIRSTY && !!this.state.isThirsty) {
+    if (x <= Constants.CHANCE_TO_GET_THIRSTY && !this.state.isThirsty) {
       this.setState({ isThirsty: true }, () => {
         // TODO : 목 말라요
         this.setMessage("");
       });
     }
-  }
+  };
 
-  drink() {
+  drink = () => {
     this.setState(
       {
         isDrinking: true,
         isThirsty: false
       },
       () => {
-        this.earnLovePoint(this.generateEarningPoint());
         this.setStopDrinkingTimer();
         // TODO : 너도 마실래?
         this.setMessage("");
       }
     );
-  }
+  };
 
-  setStopDrinkingTimer() {
+  setStopDrinkingTimer = () => {
     setTimeout(() => {
+      this.earnLovePoint(this.generateEarningPoint());
       this.setState({ isDrinking: false });
-    }, Constants.DRINKING_STOPPER_MILLISECONDS);
-  }
+    }, Constants.DRINK_STOPPER_MILLISECONDS);
+  };
 
-  findItem() {
+  findItem = () => {
     this.state.isFinding || this.setState({ isFinding: true });
-  }
+  };
 
-  pickUpItem() {
+  pickUpItem = () => {
     this.setState(
       {
         isFinding: false,
@@ -252,38 +261,38 @@ class StateProvider extends Component {
     );
     this.setNextItem();
     this.earnLovePoint(this.generateEarningPoint());
-  }
+  };
 
-  setHappyStopper() {
+  setHappyStopper = () => {
     this.happyStopper = setTimeout(() => {
       this.setState({ isHappy: false });
       this.happyStopper = 0;
     }, Constants.HAPPY_STOPPER_MILLISECONDS);
-  }
+  };
 
   // 캐릭터의 상태와는 별개로, 다음 아이템은 항상 정해져 있다.
-  setNextItem() {
+  setNextItem = () => {
     const nextItemIndex = Math.floor(Math.random() * items.length);
     this.setState({
       desiredItemId: items[nextItemIndex].id,
       distanceToItem: this.generateNextDistance()
     });
-  }
+  };
 
-  earnLovePoint(point) {
+  earnLovePoint = point => {
     const lovePoint = this.state.lovePoint + point;
     const threshold = this.growthStages[this.state.growthStage];
     this.setState({ lovePoint: lovePoint }, () => {
       if (lovePoint >= threshold) this.evolve();
     });
-  }
+  };
 
-  generateEarningPoint() {
+  generateEarningPoint = () => {
     // 시연을 위해 100으로 고정한다
     return 100;
-  }
+  };
 
-  evolve() {
+  evolve = () => {
     this.setState(
       prevState => ({
         growthStage: Math.min(
@@ -298,20 +307,21 @@ class StateProvider extends Component {
         this.setMessage("");
       }
     );
-  }
+  };
 
-  setStopEvolvingTimer() {
+  setStopEvolvingTimer = () => {
     setTimeout(() => {
       this.setState({ isEvolving: false }, () => {
         // 시연용으로 better 이상에서만
+
         if (this.state.growthStage > 0) this.desireItem();
       });
     }, Constants.EVOLVE_STOPPER_MILLISECONDS);
-  }
+  };
 
-  setMessage(message) {
+  setMessage = message => {
     this.setState({ message: message });
-  }
+  };
 
   render() {
     const { state, actions } = this;

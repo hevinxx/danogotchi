@@ -3,11 +3,10 @@ import {
   Animated,
   StyleSheet,
   View,
-  Button,
   Image,
-  Text,
   Easing,
-  TouchableOpacity
+  TouchableOpacity,
+  Vibration
 } from "react-native";
 import SpriteSheet from "rn-sprite-sheet";
 import {
@@ -19,8 +18,6 @@ import {
   CHARACTER_STATE_HAPPY,
   CHARACTER_STATE_FINDING,
   CHARACTER_STATE_DRINKING,
-  THRESHOLD_BETTER,
-  THRESHOLD_BEST,
   EGG,
   HATCHING,
   BORN
@@ -86,10 +83,7 @@ const getSpriteIndex = (growthStage, state) => {
 };
 
 const getAnimationFrame = idx => [idx, idx + 1, idx + 2, idx + 3];
-
-const getAnimationName = (growthStage, state) => {
-  return growthStage.toString() + state;
-};
+const getAnimationName = (growthStage, state) => growthStage.toString() + state;
 
 class MainArea extends Component {
   state = {
@@ -97,46 +91,53 @@ class MainArea extends Component {
     resetAfterFinish: false,
     fps: "3",
     bgPos: new Animated.Value(0),
-
-    growthStage: this.props.growthStage,
-    characterState: this.props.characterState,
-    bubble: ""
+    itemPos: new Animated.Value(-300)
   };
 
-  static getDerivedStateFromProps = (nextProps, prevState) => {
-    return {
-      ...(nextProps.growthStage !== prevState.growthStage && {
-        growthStage: nextProps.growthStage
-      }),
-      ...(nextProps.characterState !== prevState.characterState && {
-        characterState: nextProps.characterState
-      }),
-      ...(nextProps.bubble !== prevState.bubble && { bubble: nextProps.bubble })
-    };
-  };
-
-  componentDidMount = () => {};
+  /* TODO: 언제 애니메이션 시작? */
+  itemAnimate = Animated.timing(this.state.itemPos, {
+    duration: 3000,
+    toValue: 100,
+    easing: Easing.linear
+  });
 
   componentDidUpdate = (prevProps, prevState) => {
     if (this.props.hachingLevel !== BORN) {
+      this.bornBg.play({
+        type: "default",
+        fps: 3,
+        resetAfterFinish: true,
+        loop: true
+      });
       this.play(this.props.hachingLevel === EGG ? "hatch1" : "hatch2", {
         loop: true
       });
       return;
     }
+
+    if (this.props.characterState === CHARACTER_STATE_EVOLVING) {
+      this.tadaBg.play({
+        type: "default",
+        fps: 3,
+        resetAfterFinish: true,
+        loop: true
+      });
+      Vibration.vibrate(3000);
+    }
     this.play(
-      getAnimationName(this.state.growthStage, this.state.characterState),
+      getAnimationName(this.props.growthStage, this.props.characterState),
       { loop: true }
     );
 
-    if (this.state.characterState === CHARACTER_STATE_WALKING) {
+    if (this.props.data.isWalking) {
       this.animate = Animated.loop(
         Animated.timing(this.state.bgPos, {
-          duration: 12000,
+          duration: 15000,
           toValue: -3375,
           easing: Easing.linear
         })
       );
+
       this.animate.start();
     } else {
       if (this.animate) this.animate.stop();
@@ -145,7 +146,14 @@ class MainArea extends Component {
   onPress = () => {
     if (this.props.hachingLevel !== BORN) {
       this.props.actions.hatch();
+      return;
     }
+
+    if (this.props.data.isThirsty) {
+      this.props.actions.drink();
+    }
+
+    this.props.actions.happy();
   };
 
   play = (type, option) => {
@@ -167,33 +175,72 @@ class MainArea extends Component {
   };
 
   render = () => {
-    const { characterState, growthStage } = this.state;
+    const { characterState } = this.props;
+    console.log(this.props.data);
     console.log(characterState);
+
     return (
       <View style={styles.mainArea}>
-        {this.props.hachingLevel !== BORN ? (
+        <Animated.View
+          style={{
+            position: "absolute",
+            zIndex: 10,
+            right: this.state.itemPos,
+            bottom: 400
+          }}
+        >
+          <Image source={require("./assets/kong.png")} />
+        </Animated.View>
+        {/* TODO: 배경 로직어떻게 해야..? */}
+        {characterState === CHARACTER_STATE_EVOLVING ? (
           <View>
-            <Image
-              source={require("./assets/Deselect.png")}
-              style={styles.bornBackGround}
+            <SpriteSheet
+              ref={ref => (this.tadaBg = ref)}
+              source={require("./assets/danogotchi_tada.png")}
+              columns={2}
+              rows={1}
+              animations={{
+                default: [0, 1]
+              }}
             />
           </View>
         ) : null}
-        {characterState === CHARACTER_STATE_WALKING ||
-        characterState === CHARACTER_STATE_DEFAULT ? (
+        {this.props.data.isWalking ? (
           <Animated.View
             style={{
               left: this.state.bgPos
             }}
           >
-            <Image source={require("./assets/Crop.png")} />
+            <Image source={require("./assets/move_bg.png")} />
           </Animated.View>
-        ) : null}
+        ) : (
+          <View>
+            <SpriteSheet
+              ref={ref => (this.bornBg = ref)}
+              source={require("./assets/Deselect.png")}
+              columns={2}
+              rows={1}
+              animations={{
+                default: [0, 1]
+              }}
+            />
+          </View>
+        )}
+
         <View style={styles.characterContainer}>
           <TouchableOpacity onPress={this.onPress}>
-            <View style={styles.bubbleContainer}>
-              {/* <Image source={require("./assets/icon.png")} /> */}
-            </View>
+            {this.props.data.isDesiringItem &&
+            characterState !== CHARACTER_STATE_EVOLVING ? (
+              <View style={styles.bubbleContainer}>
+                <Image source={require("./assets/want_03_proteinchoco.png")} />
+              </View>
+            ) : null}
+            {this.props.data.isThirsty &&
+            characterState !== CHARACTER_STATE_EVOLVING ? (
+              <View style={styles.bubbleContainer}>
+                <Image source={require("./assets/want_01_water.png")} />
+              </View>
+            ) : null}
 
             <SpriteSheet
               ref={ref => (this.character = ref)}
@@ -355,12 +402,16 @@ const styles = StyleSheet.create({
   background: {
     left: -100
   },
-  bubbleContainer: {},
+  bubbleContainer: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: -10
+  },
   characterContainer: {
     display: "flex",
     alignItems: "center",
     marginTop: "auto",
-    marginBottom: "30%"
+    marginBottom: "40%"
   },
   character: {},
   bornBackGround: {

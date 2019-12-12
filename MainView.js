@@ -27,17 +27,33 @@ const getCharacterState = state => {
 class MainView extends React.Component {
   render = () => {
     const characterState = getCharacterState(this.props.homeProvider.state);
-    console.log(this.props.homeProvider);
+
     return (
       <>
-        <DescriptionArea />
         <MainArea
           growthStage={this.props.homeProvider.state.growthStage}
           characterState={characterState}
           hachingLevel={this.props.homeProvider.state.hatchingLevel}
           actions={this.props.homeProvider.actions}
-          bubble=""
+          data={this.props.homeProvider.state} // TODO: 위에거랑 합치기
         />
+
+        {/* TODO: zindex 이슈로 넣으면 클릭이안됨 */}
+        <View
+          style={{
+            position: "absolute",
+            bottom: 30,
+            left: 10
+          }}
+        >
+          <Text
+            style={{ color: "#fff", fontSize: 20, fontFamily: "DungGeunMo" }}
+          >
+            어쩌구저쩌구
+            {this.props.homeProvider.state.message}
+          </Text>
+        </View>
+        {/* <DescriptionArea></DescriptionArea> */}
       </>
     );
   };
