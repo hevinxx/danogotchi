@@ -9,8 +9,12 @@ const { Provider, Consumer } = Context;
 class StateProvider extends Component {
   constructor(props) {
     super(props);
-    
-    this.growthStages = [0, Constants.THRESHOLD_BETTER, Constants.THRESHOLD_BEST];
+
+    this.growthStages = [
+      0,
+      Constants.THRESHOLD_BETTER,
+      Constants.THRESHOLD_BEST
+    ];
     this.state = {
       // 0: good, 1: better, 2: best
       growthStage: 0,
@@ -31,14 +35,14 @@ class StateProvider extends Component {
       isPedometerAvailable: "checking",
 
       /**
-       * desiredItemId는 항상 하나를 갖고 있는다. 
-       * isDesiringItem이 false일 때는 드러나지 않다가 true가 될 때 캐릭터가 요청한다. 
+       * desiredItemId는 항상 하나를 갖고 있는다.
+       * isDesiringItem이 false일 때는 드러나지 않다가 true가 될 때 캐릭터가 요청한다.
        * distanceToItem이 이 FIND_ITEM_DISTANCE되면 아이템을 만난다.
        */
       isDesiringItem: false,
       desiredItemId: null,
       distanceToItem: 100,
- 
+
       isThirsty: false,
       isDrinking: false,
 
@@ -46,7 +50,7 @@ class StateProvider extends Component {
 
       isHappy: false,
 
-      message: "",
+      message: ""
     };
 
     this.actions = {
@@ -55,7 +59,7 @@ class StateProvider extends Component {
       desireItem: this.desireItem,
       pickUpItem: this.pickUpItem,
       becomeThirsty: this.becomeThirsty,
-      evolve: this.evolve,
+      evolve: this.evolve
     };
   }
 
@@ -69,7 +73,7 @@ class StateProvider extends Component {
 
   subscribePedometer = () => {
     this.pedometerSubscription = Pedometer.watchStepCount(step => {
-      this.walk(step)
+      this.walk(step);
     });
 
     Pedometer.isAvailableAsync().then(
@@ -97,197 +101,216 @@ class StateProvider extends Component {
    */
   walk(step) {
     // 시연을 위해 better 단계 이상에서만.
-    if (this.state.hatchingLevel != Constants.BORN) return
-    if (this.state.growthStage < 1) return
+    if (this.state.hatchingLevel != Constants.BORN) return;
+    if (this.state.growthStage < 1) return;
 
-    if (this.state.isDrinking
-      || this.state.isHappy
-      || this.state.isEvolving
-      || this.state.isFinding 
-      || this.state.isDesiringItem) {
+    if (
+      this.state.isDrinking ||
+      this.state.isHappy ||
+      this.state.isEvolving ||
+      this.state.isFinding ||
+      this.state.isDesiringItem
+    ) {
       if (!this.state.isAppForeground) {
-        this.setState({ previousStep: step })
-        return
+        this.setState({ previousStep: step });
+        return;
       }
     }
 
     // 타이머가 있었을 시 초기화한다.
-    this.clearStopWalkingTimer()
+    this.clearStopWalkingTimer();
 
-    const dStep = step - this.state.previousStep
-    const distanceToItem = Math.max(this.state.distanceToItem - dStep, Constants.FIND_ITEM_DISTANCE)
+    const dStep = step - this.state.previousStep;
+    const distanceToItem = Math.max(
+      this.state.distanceToItem - dStep,
+      Constants.FIND_ITEM_DISTANCE
+    );
 
     // 이미 isWalking이라면 다시 true할 필요 없다.
     const newState = this.state.isWalking
       ? {
-        distanceToItem: distanceToItem,
-        previousStep: step
-      } : {
-        distanceToItem: distanceToItem,
-        previousStep: step,
-        isWalking: true
-      }
+          distanceToItem: distanceToItem,
+          previousStep: step
+        }
+      : {
+          distanceToItem: distanceToItem,
+          previousStep: step,
+          isWalking: true
+        };
     this.setState(newState, () => {
       // 타이머를 설정한다.
-      this.setStopWalkingTimer()
+      this.setStopWalkingTimer();
       // 아이템과의 거리가 FIND_ITEM_DISTANCE 보다 가까워졌을 시 findItem을 실행한다.
-      distanceToItem <= Constants.FIND_ITEM_DISTANCE && this.findItem()
-    })
+      distanceToItem <= Constants.FIND_ITEM_DISTANCE && this.findItem();
+    });
   }
 
   // 걸었다는 신호가 들어온 뒤 WALKING_STOPPER_MILLISECONDS가 지나면 걷지 않는 상태로 만든다.
   setStopWalkingTimer() {
     setTimeout(() => {
-      this.setState({ isWalking: false })
-    }, Constants.WALKING_STOPPER_MILLISECONDS)
+      this.setState({ isWalking: false });
+    }, Constants.WALKING_STOPPER_MILLISECONDS);
   }
 
   clearStopWalkingTimer() {
     if (this.walkingStopper) {
-      clearTimeout(this.walkingStopper)
-      this.walkingStopper = 0
+      clearTimeout(this.walkingStopper);
+      this.walkingStopper = 0;
     }
   }
 
   // 다음 아이템과의 거리를 결정한다.
   generateNextDistance() {
-    return Math.max(Math.floor(Math.random() * Constants.MAX_DISTANCE), Constants.FIND_ITEM_DISTANCE + 10)
+    return Math.max(
+      Math.floor(Math.random() * Constants.MAX_DISTANCE),
+      Constants.FIND_ITEM_DISTANCE + 10
+    );
   }
 
-  hatch() {
+  hatch = () => {
     this.setState({ hatchingLevel: Constants.HATCHING }, () => {
       setTimeout(() => {
-        this.setState({ hatchingLevel: Constants.BORN }, this.becomeThirsty())
-      }, Constants.HATCHING_MILLISECONDS)
-    })
-  }
+        this.setState({ hatchingLevel: Constants.BORN }, this.becomeThirsty());
+      }, Constants.HATCHING_MILLISECONDS);
+    });
+  };
 
   desireItem() {
     this.desireInterval = setInterval(() => {
       if (!this.state.isDesiringItem) {
         // 시연을 위해 better, best 단계에서만
-        if (this.state.growthStage != 0) this.setDesiringItemRandomly()
+        if (this.state.growthStage != 0) this.setDesiringItemRandomly();
       }
-    }, Constants.GETTING_THIRSTY_MILLISECONDS)
+    }, Constants.GETTING_THIRSTY_MILLISECONDS);
   }
 
   // 일정 확률로 아이템을 원하는 상태로 만든다.
   setDesiringItemRandomly() {
-    const x = Math.random()
-    if (x <= Constants.CHANCE_TO_GET_DESIRING
-      && !!this.state.isDesiringItem) {
+    const x = Math.random();
+    if (x <= Constants.CHANCE_TO_GET_DESIRING && !!this.state.isDesiringItem) {
       this.setState({ isDesiringItem: true }, () => {
         // TODO : 아이템 필요해요.
-        this.setMessage("")
-      })
+        this.setMessage("");
+      });
     }
   }
 
   becomeThirsty() {
     this.drinkInterval = setInterval(() => {
       // 시연을 위해 good 단계에서만
-      if (this.state.growthStage == 0) this.setThirstyRandomly()
-    }, Constants.GET_THIRSTY_MILLISECONDS)
+      if (this.state.growthStage == 0) this.setThirstyRandomly();
+    }, Constants.GET_THIRSTY_MILLISECONDS);
   }
 
   // 일정 확률로 목 마른 상태로 만든다.
   setThirstyRandomly() {
-    const x = Math.random()
-    if (x <= Constants.CHANCE_TO_GET_THIRSTY
-      && !!this.state.isThirsty) {
+    const x = Math.random();
+    if (x <= Constants.CHANCE_TO_GET_THIRSTY && !!this.state.isThirsty) {
       this.setState({ isThirsty: true }, () => {
         // TODO : 목 말라요
-        this.setMessage("")
-      })
+        this.setMessage("");
+      });
     }
   }
 
   drink() {
-    this.setState({ 
-      isDrinking: true,
-      isThirsty: false
-    }, () => {
-      this.earnLovePoint(this.generateEarningPoint())
-      this.setStopDrinkingTimer()
-      // TODO : 너도 마실래?
-      this.setMessage("")
-    })
+    this.setState(
+      {
+        isDrinking: true,
+        isThirsty: false
+      },
+      () => {
+        this.earnLovePoint(this.generateEarningPoint());
+        this.setStopDrinkingTimer();
+        // TODO : 너도 마실래?
+        this.setMessage("");
+      }
+    );
   }
 
   setStopDrinkingTimer() {
     setTimeout(() => {
-      this.setState({ isDrinking: false })
-    }, Constants.DRINKING_STOPPER_MILLISECONDS)
+      this.setState({ isDrinking: false });
+    }, Constants.DRINKING_STOPPER_MILLISECONDS);
   }
 
   findItem() {
-    this.state.isFinding || this.setState({ isFinding: true })
+    this.state.isFinding || this.setState({ isFinding: true });
   }
 
   pickUpItem() {
-    this.setState({ 
-      isFinding: false,
-      isHappy: true
-    }, () => {
-      this.setHappyStopper()
-      // TODO : 아이템을 얻었다!
-      this.setMessage("")
-    })
-    this.setNextItem()
-    this.earnLovePoint(this.generateEarningPoint())
+    this.setState(
+      {
+        isFinding: false,
+        isHappy: true
+      },
+      () => {
+        this.setHappyStopper();
+        // TODO : 아이템을 얻었다!
+        this.setMessage("");
+      }
+    );
+    this.setNextItem();
+    this.earnLovePoint(this.generateEarningPoint());
   }
 
   setHappyStopper() {
     this.happyStopper = setTimeout(() => {
-      this.setState({ isHappy: false })
-      this.happyStopper = 0
-    }, Constants.HAPPY_STOPPER_MILLISECONDS)
+      this.setState({ isHappy: false });
+      this.happyStopper = 0;
+    }, Constants.HAPPY_STOPPER_MILLISECONDS);
   }
 
   // 캐릭터의 상태와는 별개로, 다음 아이템은 항상 정해져 있다.
   setNextItem() {
-    const nextItemIndex = Math.floor(Math.random() * items.length)
-    this.setState({ 
+    const nextItemIndex = Math.floor(Math.random() * items.length);
+    this.setState({
       desiredItemId: items[nextItemIndex].id,
       distanceToItem: this.generateNextDistance()
-    })
+    });
   }
 
   earnLovePoint(point) {
-    const lovePoint = this.state.lovePoint + point
-    const threshold = this.growthStages[this.state.growthStage]
+    const lovePoint = this.state.lovePoint + point;
+    const threshold = this.growthStages[this.state.growthStage];
     this.setState({ lovePoint: lovePoint }, () => {
-      if (lovePoint >= threshold) this.evolve()
-    })
+      if (lovePoint >= threshold) this.evolve();
+    });
   }
 
   generateEarningPoint() {
     // 시연을 위해 100으로 고정한다
-    return 100
+    return 100;
   }
 
   evolve() {
-    this.setState(prevState => ({ 
-      growthStage: Math.min(prevState.growthStage + 1, this.growthStages.length),
-      isEvolving: true
-    }), () => {
-      this.setStopEvolvingTimer()
-      // TODO : 진화했다!
-      this.setMessage("")
-    })
+    this.setState(
+      prevState => ({
+        growthStage: Math.min(
+          prevState.growthStage + 1,
+          this.growthStages.length
+        ),
+        isEvolving: true
+      }),
+      () => {
+        this.setStopEvolvingTimer();
+        // TODO : 진화했다!
+        this.setMessage("");
+      }
+    );
   }
 
   setStopEvolvingTimer() {
     setTimeout(() => {
       this.setState({ isEvolving: false }, () => {
         // 시연용으로 better 이상에서만
-        if (this.state.growthStage > 0) this.desireItem()
-      })
-    }, Constants.EVOLVE_STOPPER_MILLISECONDS)
+        if (this.state.growthStage > 0) this.desireItem();
+      });
+    }, Constants.EVOLVE_STOPPER_MILLISECONDS);
   }
 
   setMessage(message) {
-    this.setState({ message: message})
+    this.setState({ message: message });
   }
 
   render() {
@@ -301,13 +324,13 @@ class StateProvider extends Component {
 function withState(Component) {
   class ComponentWithContext extends React.Component {
     render() {
-        return (
-            <Consumer>
-                {(value) => <Component {...this.props} homeProvider={value} />}
-            </Consumer>
-        );
-    };
-  };
+      return (
+        <Consumer>
+          {value => <Component {...this.props} homeProvider={value} />}
+        </Consumer>
+      );
+    }
+  }
   return ComponentWithContext;
 }
 

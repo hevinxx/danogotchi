@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Button } from "react-native";
+import { View, Button, TouchableOpacity, Text } from "react-native";
 import MainArea from "./MainArea";
 import * as Constants from "./Constants";
 import DescriptionArea from "./DescriptionArea";
@@ -27,19 +27,18 @@ const getCharacterState = state => {
 class MainView extends React.Component {
   render = () => {
     const characterState = getCharacterState(this.props.homeProvider.state);
-
+    console.log(this.props.homeProvider);
     return (
-      <View style={{ flex: 1 }}>
-        <View
-          style={{ width: 100, top: 100, position: "absolute", zIndex: 10 }}
-        ></View>
+      <>
+        <DescriptionArea />
         <MainArea
           growthStage={this.props.homeProvider.state.growthStage}
           characterState={characterState}
+          hachingLevel={this.props.homeProvider.state.hatchingLevel}
+          actions={this.props.homeProvider.actions}
           bubble=""
         />
-        <DescriptionArea />
-      </View>
+      </>
     );
   };
 }

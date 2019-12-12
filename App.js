@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import * as Font from "expo-font";
 import MainView from "./MainView";
-import { StateProvider } from "./StateContext"
+import { StateProvider } from "./StateContext";
 
 class App extends React.Component {
   state = {

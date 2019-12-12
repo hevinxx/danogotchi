@@ -5,7 +5,9 @@ import {
   View,
   Button,
   Image,
-  Easing
+  Text,
+  Easing,
+  TouchableOpacity
 } from "react-native";
 import SpriteSheet from "rn-sprite-sheet";
 import {
@@ -18,7 +20,10 @@ import {
   CHARACTER_STATE_FINDING,
   CHARACTER_STATE_DRINKING,
   THRESHOLD_BETTER,
-  THRESHOLD_BEST
+  THRESHOLD_BEST,
+  EGG,
+  HATCHING,
+  BORN
 } from "./Constants";
 
 const getSpriteIndex = (growthStage, state) => {
@@ -113,38 +118,34 @@ class MainArea extends Component {
   componentDidMount = () => {};
 
   componentDidUpdate = (prevProps, prevState) => {
+    if (this.props.hachingLevel !== BORN) {
+      this.play(this.props.hachingLevel === EGG ? "hatch1" : "hatch2", {
+        loop: true
+      });
+      return;
+    }
     this.play(
       getAnimationName(this.state.growthStage, this.state.characterState),
       { loop: true }
     );
-    // if (this.state.characterState === CHARACTER_STATE_WALKING) {
-    //   this.animate = Animated.loop(
-    //     Animated.timing(this.state.bgPos, {
-    //       duration: 12000,
-    //       toValue: -3375,
-    //       easing: Easing.linear
-    //     })
-    //   );
-    //   this.animate.start();
-    //   this.play(
-    //     getAnimationName(this.state.growthStage, this.state.characterState),
-    //     {
-    //       onFinish: this.defaultAction
-    //     }
-    //   );
-    //   return;
-    // }
-    // if (this.state.characterState === CHARACTER_STATE_DEFAULT) {
-    //   this.play(
-    //     getAnimationName(this.state.growthStage, this.state.characterState),
-    //     { onFinish: this.defaultAction }
-    //   );
-    //   this.animate.stop();
-    //   return;
-    // }
-    // if (this.state.characterState) {
-    //   this.play(this.state.characterState, { onFinish: this.eggAction });
-    // }
+
+    if (this.state.characterState === CHARACTER_STATE_WALKING) {
+      this.animate = Animated.loop(
+        Animated.timing(this.state.bgPos, {
+          duration: 12000,
+          toValue: -3375,
+          easing: Easing.linear
+        })
+      );
+      this.animate.start();
+    } else {
+      if (this.animate) this.animate.stop();
+    }
+  };
+  onPress = () => {
+    if (this.props.hachingLevel !== BORN) {
+      this.props.actions.hatch();
+    }
   };
 
   play = (type, option) => {
@@ -165,11 +166,19 @@ class MainArea extends Component {
     );
   };
 
-  render() {
+  render = () => {
     const { characterState, growthStage } = this.state;
-
+    console.log(characterState);
     return (
       <View style={styles.mainArea}>
+        {this.props.hachingLevel !== BORN ? (
+          <View>
+            <Image
+              source={require("./assets/Deselect.png")}
+              style={styles.bornBackGround}
+            />
+          </View>
+        ) : null}
         {characterState === CHARACTER_STATE_WALKING ||
         characterState === CHARACTER_STATE_DEFAULT ? (
           <Animated.View
@@ -181,18 +190,19 @@ class MainArea extends Component {
           </Animated.View>
         ) : null}
         <View style={styles.characterContainer}>
-          <View style={styles.bubbleContainer}>
-            {/* <Image source={require("./assets/Pencil.png")} /> */}
-          </View>
-          <View>
+          <TouchableOpacity onPress={this.onPress}>
+            <View style={styles.bubbleContainer}>
+              {/* <Image source={require("./assets/icon.png")} /> */}
+            </View>
+
             <SpriteSheet
-              style={styles.character}
               ref={ref => (this.character = ref)}
               source={require("./assets/danogotchi_character_last.png")}
               columns={4}
               rows={18}
               animations={{
-                test: [8, 9, 10, 11],
+                hatch1: [0, 1, 2, 3],
+                hatch2: [4, 5, 6, 7],
                 [getAnimationName(
                   0,
                   CHARACTER_STATE_DEFAULT
@@ -330,11 +340,11 @@ class MainArea extends Component {
                 )
               }}
             />
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
     );
-  }
+  };
 }
 
 const styles = StyleSheet.create({
@@ -352,7 +362,10 @@ const styles = StyleSheet.create({
     marginTop: "auto",
     marginBottom: "30%"
   },
-  character: {}
+  character: {},
+  bornBackGround: {
+    zIndex: 10
+  }
 });
 
 export default MainArea;
