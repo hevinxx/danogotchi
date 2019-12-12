@@ -1,7 +1,7 @@
 import React, { Component, createContext } from "react";
 
 const Context = createContext();
-const { Provider, Consumer: CounterConsumer } = Context;
+const { Provider, Consumer } = Context;
 
 class StateProvider extends Component {
   constructor(props) {
@@ -12,6 +12,7 @@ class StateProvider extends Component {
     };
 
     this.actions = {
+      // for example
       plusOne: () => {
         this.setState(prevState => ({ value: prevState.value + 1 }));
       }
@@ -26,16 +27,16 @@ class StateProvider extends Component {
   }
 }
 
-function withCounter(WrappedComponent) {
+function withState(WrappedComponent) {
   return function UseCounterProvider(props) {
     return (
-      <CounterConsumer>
+      <Consumer>
         {({ state, actions }) => (
-          <WrappedComponent value={state.value} plusOne={actions.plusOne} />
+          <WrappedComponent state={state} actions={actions} />
         )}
-      </CounterConsumer>
+      </Consumer>
     );
   };
 }
 
-export { StateProvider, CounterConsumer, withCounter };
+export { StateProvider, CounterConsumer, withState };
