@@ -12,12 +12,14 @@ const getCharacterState = state => {
     return Constants.CHARACTER_STATE_HAPPY;
   } else if (state.isEvolving) {
     return Constants.CHARACTER_STATE_EVOLVING;
+  } else if (state.isFinding) {
+    return Constants.CHARACTER_STATE_FINDING;
   } else if (state.isDesiringItem) {
-    return Constants.CHARACTER_STATE_WANT;
+    return Constants.CHARACTER_STATE_DESIRING;
   } else if (state.isWalking) {
     return Constants.CHARACTER_STATE_WALKING;
   } else if (state.isThirsty) {
-    return Constants.CHARACTER_STATE_WANT;
+    return Constants.CHARACTER_STATE_THIRSTY;
   } else {
     return Constants.CHARACTER_STATE_DEFAULT;
   }
@@ -66,7 +68,7 @@ class MainView extends React.Component {
           ></Button>
         </View>
         <MainArea
-          character={growthStage}
+          growthStage={this.props.homeProvider.state.growthStage}
           characterState={characterState}
           bubble=""
         />

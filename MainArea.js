@@ -12,7 +12,7 @@ import {
   CHARACTER_STATE_DEFAULT,
   CHARACTER_STATE_WALKING,
   CHARACTER_STATE_DESIRING,
-  CHARACTER_STATE_WANT,
+  CHARACTER_STATE_THIRSTY,
   CHARACTER_STATE_EVOLVING,
   CHARACTER_STATE_HAPPY,
   CHARACTER_STATE_FINDING,
@@ -21,64 +21,69 @@ import {
   THRESHOLD_BEST
 } from "./Constants";
 
-const getSpriteIndex = (character, state) => {
+const getSpriteIndex = (growthStage, state) => {
   let startIndex = 0;
-  if (growthStage > THRESHOLD_BEST) {
-    if (state.CHARACTER_STATE_DEFAULT === CHARACTER_STATE_DEFAULT) {
+  if (growthStage === 0) {
+    if (state === CHARACTER_STATE_WALKING) {
       startIndex = 8;
-    } else if (state.CHARACTER_STATE_WALKING === CHARACTER_STATE_WALKING) {
+    } else if (
+      state === CHARACTER_STATE_THIRSTY ||
+      state === CHARACTER_STATE_DESIRING
+    ) {
+      startIndex = 28;
+    } else if (state === CHARACTER_STATE_EVOLVING) {
+      startIndex = 16;
+    } else if (state === CHARACTER_STATE_HAPPY) {
+      startIndex = 20;
+    } else if (state === CHARACTER_STATE_FINDING) {
       startIndex = 8;
-    } else if (state.CHARACTER_STATE_DESIRING === CHARACTER_STATE_DESIRING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_WANT === CHARACTER_STATE_WANT) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_EVOLVING === CHARACTER_STATE_EVOLVING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_HAPPY === CHARACTER_STATE_HAPPY) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_FINDING === CHARACTER_STATE_FINDING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_DRINKING === CHARACTER_STATE_DRINKING) {
+    } else if (state === CHARACTER_STATE_DRINKING) {
+      startIndex = 12;
+    } else {
       startIndex = 8;
     }
-  } else if (growthStage > THRESHOLD_BETTER) {
-    if (state.CHARACTER_STATE_DEFAULT === CHARACTER_STATE_DEFAULT) {
+  } else if (growthStage === 1) {
+    if (state === CHARACTER_STATE_WALKING) {
       startIndex = 32;
-    } else if (state.CHARACTER_STATE_WALKING === CHARACTER_STATE_WALKING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_DESIRING === CHARACTER_STATE_DESIRING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_WANT === CHARACTER_STATE_WANT) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_EVOLVING === CHARACTER_STATE_EVOLVING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_HAPPY === CHARACTER_STATE_HAPPY) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_FINDING === CHARACTER_STATE_FINDING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_DRINKING === CHARACTER_STATE_DRINKING) {
-      startIndex = 8;
+    } else if (
+      state === CHARACTER_STATE_THIRSTY ||
+      state === CHARACTER_STATE_DESIRING
+    ) {
+      startIndex = 48;
+    } else if (state === CHARACTER_STATE_EVOLVING) {
+      startIndex = 36;
+    } else if (state === CHARACTER_STATE_HAPPY) {
+      startIndex = 40;
+    } else if (state === CHARACTER_STATE_FINDING) {
+      startIndex = 32;
     } else {
+      startIndex = 32;
     }
   } else {
-    if (state.CHARACTER_STATE_DEFAULT === CHARACTER_STATE_DEFAULT) {
-      startIndex = 64;
-    } else if (state.CHARACTER_STATE_WALKING === CHARACTER_STATE_WALKING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_DESIRING === CHARACTER_STATE_DESIRING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_WANT === CHARACTER_STATE_WANT) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_EVOLVING === CHARACTER_STATE_EVOLVING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_HAPPY === CHARACTER_STATE_HAPPY) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_FINDING === CHARACTER_STATE_FINDING) {
-      startIndex = 8;
-    } else if (state.CHARACTER_STATE_DRINKING === CHARACTER_STATE_DRINKING) {
-      startIndex = 8;
+    if (state === 2) {
+      startIndex = 52;
+    } else if (
+      state === CHARACTER_STATE_THIRSTY ||
+      state === CHARACTER_STATE_DESIRING
+    ) {
+      startIndex = 68;
+    } else if (state === CHARACTER_STATE_EVOLVING) {
+      startIndex = 56;
+    } else if (state === CHARACTER_STATE_HAPPY) {
+      startIndex = 60;
+    } else if (state === CHARACTER_STATE_FINDING) {
+      startIndex = 52;
+    } else {
+      startIndex = 52;
     }
   }
+  return startIndex;
+};
+
+const getAnimationFrame = idx => [idx, idx + 1, idx + 2, idx + 3];
+
+const getAnimationName = (growthStage, state) => {
+  return growthStage.toString() + state;
 };
 
 class MainArea extends Component {
@@ -88,15 +93,15 @@ class MainArea extends Component {
     fps: "3",
     bgPos: new Animated.Value(0),
 
-    character: "",
-    characterState: "",
+    growthStage: this.props.growthStage,
+    characterState: this.props.characterState,
     bubble: ""
   };
 
   static getDerivedStateFromProps = (nextProps, prevState) => {
     return {
-      ...(nextProps.character !== prevState.character && {
-        character: nextProps.character
+      ...(nextProps.growthStage !== prevState.growthStage && {
+        growthStage: nextProps.growthStage
       }),
       ...(nextProps.characterState !== prevState.characterState && {
         characterState: nextProps.characterState
@@ -108,23 +113,37 @@ class MainArea extends Component {
   componentDidMount = () => {};
 
   componentDidUpdate = (prevProps, prevState) => {
-    if (this.state.characterState === CHARACTER_STATE_WALKING) {
-      this.animate = Animated.loop(
-        Animated.timing(this.state.bgPos, {
-          duration: 12000,
-          toValue: -3375,
-          easing: Easing.linear
-        })
-      );
-      this.animate.start();
-      this.play(this.state.characterState, { onFinish: this.defaultAction });
-      return;
-    }
-    if (this.state.characterState === CHARACTER_STATE_DEFAULT) {
-      this.play(this.state.characterState, { onFinish: this.defaultAction });
-      this.animate.stop();
-      return;
-    }
+    this.play(
+      getAnimationName(this.state.growthStage, this.state.characterState),
+      { loop: true }
+    );
+    console.log(this.state.growthStage);
+    console.log(this.state.characterState);
+    // if (this.state.characterState === CHARACTER_STATE_WALKING) {
+    //   this.animate = Animated.loop(
+    //     Animated.timing(this.state.bgPos, {
+    //       duration: 12000,
+    //       toValue: -3375,
+    //       easing: Easing.linear
+    //     })
+    //   );
+    //   this.animate.start();
+    //   this.play(
+    //     getAnimationName(this.state.growthStage, this.state.characterState),
+    //     {
+    //       onFinish: this.defaultAction
+    //     }
+    //   );
+    //   return;
+    // }
+    // if (this.state.characterState === CHARACTER_STATE_DEFAULT) {
+    //   this.play(
+    //     getAnimationName(this.state.growthStage, this.state.characterState),
+    //     { onFinish: this.defaultAction }
+    //   );
+    //   this.animate.stop();
+    //   return;
+    // }
     // if (this.state.characterState) {
     //   this.play(this.state.characterState, { onFinish: this.eggAction });
     // }
@@ -142,11 +161,14 @@ class MainArea extends Component {
   };
 
   defaultAction = () => {
-    this.play(CHARACTER_STATE_DEFAULT, { loop: true });
+    this.play(
+      getAnimationName(this.state.growthStage, CHARACTER_STATE_DEFAULT),
+      { loop: true }
+    );
   };
 
   render() {
-    const { characterState, character } = this.state;
+    const { characterState, growthStage } = this.state;
 
     return (
       <View style={styles.mainArea}>
@@ -172,11 +194,141 @@ class MainArea extends Component {
               columns={4}
               rows={18}
               animations={{
-                // egg: [0, 1, 2, 3],
-                [CHARACTER_STATE_DEFAULT]: [4, 5, 6, 7],
-                [CHARACTER_STATE_WALKING]: [4, 5, 6, 7],
-                [CHARACTER_STATE_THIRSTY]: [8, 9, 10, 11],
-                [CHARACTER_STATE_EVOLVING]: [12, 13, 14, 15]
+                [getAnimationName(
+                  0,
+                  CHARACTER_STATE_DEFAULT
+                )]: getAnimationFrame(
+                  getSpriteIndex(0, CHARACTER_STATE_DEFAULT)
+                ),
+                [getAnimationName(
+                  0,
+                  CHARACTER_STATE_WALKING
+                )]: getAnimationFrame(
+                  getSpriteIndex(0, CHARACTER_STATE_WALKING)
+                ),
+                [getAnimationName(
+                  0,
+                  CHARACTER_STATE_DESIRING
+                )]: getAnimationFrame(
+                  getSpriteIndex(0, CHARACTER_STATE_DESIRING)
+                ),
+                [getAnimationName(
+                  0,
+                  CHARACTER_STATE_THIRSTY
+                )]: getAnimationFrame(
+                  getSpriteIndex(0, CHARACTER_STATE_THIRSTY)
+                ),
+                [getAnimationName(
+                  0,
+                  CHARACTER_STATE_EVOLVING
+                )]: getAnimationFrame(
+                  getSpriteIndex(0, CHARACTER_STATE_EVOLVING)
+                ),
+                [getAnimationName(0, CHARACTER_STATE_HAPPY)]: getAnimationFrame(
+                  getSpriteIndex(0, CHARACTER_STATE_HAPPY)
+                ),
+                [getAnimationName(
+                  0,
+                  CHARACTER_STATE_FINDING
+                )]: getAnimationFrame(
+                  getSpriteIndex(0, CHARACTER_STATE_FINDING)
+                ),
+                [getAnimationName(
+                  0,
+                  CHARACTER_STATE_DRINKING
+                )]: getAnimationFrame(
+                  getSpriteIndex(0, CHARACTER_STATE_DRINKING)
+                ),
+                [getAnimationName(
+                  1,
+                  CHARACTER_STATE_DEFAULT
+                )]: getAnimationFrame(
+                  getSpriteIndex(1, CHARACTER_STATE_DEFAULT)
+                ),
+                [getAnimationName(
+                  1,
+                  CHARACTER_STATE_WALKING
+                )]: getAnimationFrame(
+                  getSpriteIndex(1, CHARACTER_STATE_WALKING)
+                ),
+                [getAnimationName(
+                  1,
+                  CHARACTER_STATE_DESIRING
+                )]: getAnimationFrame(
+                  getSpriteIndex(1, CHARACTER_STATE_DESIRING)
+                ),
+                [getAnimationName(
+                  1,
+                  CHARACTER_STATE_THIRSTY
+                )]: getAnimationFrame(
+                  getSpriteIndex(1, CHARACTER_STATE_THIRSTY)
+                ),
+                [getAnimationName(
+                  1,
+                  CHARACTER_STATE_EVOLVING
+                )]: getAnimationFrame(
+                  getSpriteIndex(1, CHARACTER_STATE_EVOLVING)
+                ),
+                [getAnimationName(1, CHARACTER_STATE_HAPPY)]: getAnimationFrame(
+                  getSpriteIndex(1, CHARACTER_STATE_HAPPY)
+                ),
+                [getAnimationName(
+                  1,
+                  CHARACTER_STATE_FINDING
+                )]: getAnimationFrame(
+                  getSpriteIndex(1, CHARACTER_STATE_FINDING)
+                ),
+                [getAnimationName(
+                  1,
+                  CHARACTER_STATE_DRINKING
+                )]: getAnimationFrame(
+                  getSpriteIndex(1, CHARACTER_STATE_DRINKING)
+                ),
+                [getAnimationName(
+                  2,
+                  CHARACTER_STATE_DEFAULT
+                )]: getAnimationFrame(
+                  getSpriteIndex(2, CHARACTER_STATE_DEFAULT)
+                ),
+                [getAnimationName(
+                  2,
+                  CHARACTER_STATE_WALKING
+                )]: getAnimationFrame(
+                  getSpriteIndex(2, CHARACTER_STATE_WALKING)
+                ),
+                [getAnimationName(
+                  2,
+                  CHARACTER_STATE_DESIRING
+                )]: getAnimationFrame(
+                  getSpriteIndex(2, CHARACTER_STATE_DESIRING)
+                ),
+                [getAnimationName(
+                  2,
+                  CHARACTER_STATE_THIRSTY
+                )]: getAnimationFrame(
+                  getSpriteIndex(2, CHARACTER_STATE_THIRSTY)
+                ),
+                [getAnimationName(
+                  2,
+                  CHARACTER_STATE_EVOLVING
+                )]: getAnimationFrame(
+                  getSpriteIndex(2, CHARACTER_STATE_EVOLVING)
+                ),
+                [getAnimationName(2, CHARACTER_STATE_HAPPY)]: getAnimationFrame(
+                  getSpriteIndex(2, CHARACTER_STATE_HAPPY)
+                ),
+                [getAnimationName(
+                  2,
+                  CHARACTER_STATE_FINDING
+                )]: getAnimationFrame(
+                  getSpriteIndex(2, CHARACTER_STATE_FINDING)
+                ),
+                [getAnimationName(
+                  2,
+                  CHARACTER_STATE_DRINKING
+                )]: getAnimationFrame(
+                  getSpriteIndex(2, CHARACTER_STATE_DRINKING)
+                )
               }}
             />
           </View>
@@ -199,7 +351,7 @@ const styles = StyleSheet.create({
     display: "flex",
     alignItems: "center",
     marginTop: "auto",
-    marginBottom: "30%"
+    marginBottom: "50%"
   },
   character: {}
 });
