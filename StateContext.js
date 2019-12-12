@@ -10,7 +10,7 @@ class StateProvider extends Component {
   constructor(props) {
     super(props);
     
-    const growthStages = [0, Constants.THRESHOLD_BETTER, Constants.THRESHOLD_BEST];
+    this.growthStages = [0, Constants.THRESHOLD_BETTER, Constants.THRESHOLD_BEST];
     this.state = {
       // 0: good, 1: better, 2: best
       growthStage: 0,
@@ -203,7 +203,7 @@ class StateProvider extends Component {
   fillLovePointBar(prevStage, lovePoint) {
     // TODO : 바 채우는 애니메이션
     // 다 찼을 경우
-    if (lovePoint >= growthStages[prevStage]) {
+    if (lovePoint >= this.growthStages[prevStage]) {
       // 남은 만큼 더 채우기
       this.evolve()
     }
@@ -211,7 +211,7 @@ class StateProvider extends Component {
 
   evolve() {
     this.setState(prevState => ({ 
-      growthStage: Math.min(prevState.growthStage + 1, growthStages.length),
+      growthStage: Math.min(prevState.growthStage + 1, this.growthStages.length),
       isEvolving: true
     }), () => {
       // TODO : 진화했다!
