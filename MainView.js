@@ -1,15 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  SafeAreaView,
-  View,
-  Button,
-  TextInput,
-  Switch,
-  Text,
-  KeyboardAvoidingView
-} from "react-native";
-import SpriteSheet from "rn-sprite-sheet";
+import { View, Button } from "react-native";
 import MainArea from "./MainArea";
 import DescriptionArea from "./DescriptionArea";
 

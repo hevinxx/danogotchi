@@ -8,10 +8,7 @@ import {
   Easing
 } from "react-native";
 import SpriteSheet from "rn-sprite-sheet";
-import { TrackingConfigurations } from "expo/build/AR";
 import { withState } from "./StateContext";
-
-const characterURL = {};
 
 class MainArea extends Component {
   state = {
@@ -24,14 +21,6 @@ class MainArea extends Component {
     characterState: "",
     bubble: ""
   };
-
-  animate = Animated.loop(
-    Animated.timing(this.state.bgPos, {
-      duration: 12000,
-      toValue: -3375,
-      easing: Easing.linear
-    })
-  );
 
   static getDerivedStateFromProps = (nextProps, prevState) => {
     return {
@@ -59,6 +48,7 @@ class MainArea extends Component {
         })
       );
       this.animate.start();
+      this.play(this.state.characterState, { onFinish: this.defaultAction });
       return;
     }
     if (this.state.characterState === "default") {
@@ -68,9 +58,9 @@ class MainArea extends Component {
       // this.state.bgPos.setOffset(this.state.bgPos._value);
       return;
     }
-    if (this.state.characterState) {
-      this.play(this.state.characterState, { onFinish: this.eggAction });
-    }
+    // if (this.state.characterState) {
+    //   this.play(this.state.characterState, { onFinish: this.eggAction });
+    // }
   };
 
   play = (type, option) => {
