@@ -1,44 +1,18 @@
 import React from "react";
-import {
-  StyleSheet,
-  SafeAreaView,
-  View,
-  Button,
-  TextInput,
-  Switch,
-  Text,
-  KeyboardAvoidingView
-} from "react-native";
-import SpriteSheet from "rn-sprite-sheet";
+import { View, Text } from "react-native";
 import * as Font from "expo-font";
 import MainView from "./MainView";
-import DescriptionArea from "./DescriptionArea";
 
 class App extends React.Component {
   state = {
-    loop: true,
-    resetAfterFinish: false,
-    fps: "16"
+    isFontLoaded: false
   };
-
   componentDidMount = async () => {
     await Font.loadAsync({
       PressStart2P: require("./assets/PressStart2P.ttf")
     });
 
     this.setState({ isFontLoaded: true });
-  };
-
-  play = type => {
-    const { fps, loop, resetAfterFinish } = this.state;
-
-    this.mummy.play({
-      type,
-      fps: Number(fps),
-      loop: loop,
-      resetAfterFinish: resetAfterFinish,
-      onFinish: () => console.log("hi")
-    });
   };
 
   render = () => {
