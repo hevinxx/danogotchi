@@ -246,16 +246,17 @@ class StateProvider extends Component {
   }
 }
 
-function withState(WrappedComponent) {
-  return function UseCounterProvider(props) {
-    return (
-      <Consumer>
-        {({ state, actions }) => (
-          <WrappedComponent state={state} actions={actions} />
-        )}
-      </Consumer>
-    );
+function withState(Component) {
+  class ComponentWithContext extends React.Component {
+    render() {
+        return (
+            <Consumer>
+                {(value) => <Component {...this.props} homeProvider={value} />}
+            </Consumer>
+        );
+    };
   };
+  return ComponentWithContext;
 }
 
 export { StateProvider, Consumer, withState };

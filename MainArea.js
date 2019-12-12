@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import SpriteSheet from "rn-sprite-sheet";
 import { TrackingConfigurations } from "expo/build/AR";
+import { withState } from "./StateContext";
 
 const characterURL = {};
 
@@ -149,4 +150,4 @@ const styles = StyleSheet.create({
   character: {}
 });
 
-export default MainArea;
+export default withState(MainArea);
