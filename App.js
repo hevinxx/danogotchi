@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView
 } from "react-native";
 import SpriteSheet from "rn-sprite-sheet";
+import * as Font from "expo-font";
 import MainView from "./MainView";
 import DescriptionArea from "./DescriptionArea";
 
