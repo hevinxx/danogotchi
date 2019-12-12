@@ -10,6 +10,7 @@ import {
   CHARACTER_STATE_HAPPY
 } from "./Constants";
 import DescriptionArea from "./DescriptionArea";
+import { withState } from "./StateContext";
 
 class MainView extends React.Component {
   state = {
@@ -18,6 +19,7 @@ class MainView extends React.Component {
   };
 
   render = () => {
+    console.log(this.props)
     return (
       <View style={{ flex: 1 }}>
         <View
@@ -53,4 +55,4 @@ class MainView extends React.Component {
   };
 }
 
-export default MainView;
+export default withState(MainView);

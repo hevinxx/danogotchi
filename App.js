@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text } from "react-native";
 import * as Font from "expo-font";
 import MainView from "./MainView";
+import { StateProvider } from "./StateContext"
 
 class App extends React.Component {
   state = {
@@ -25,9 +26,9 @@ class App extends React.Component {
     }
 
     return (
-      <View style={{ flex: 1 }}>
+      <StateProvider style={{ flex: 1 }}>
         <MainView />
-      </View>
+      </StateProvider>
     );
   };
 }

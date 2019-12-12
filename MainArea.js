@@ -8,7 +8,6 @@ import {
   Easing
 } from "react-native";
 import SpriteSheet from "rn-sprite-sheet";
-import { withState } from "./StateContext";
 import {
   CHARACTER_STATE_DEFAULT,
   CHARACTER_STATE_WALKING,
@@ -141,4 +140,4 @@ const styles = StyleSheet.create({
   character: {}
 });
 
-export default withState(MainArea);
+export default MainArea;

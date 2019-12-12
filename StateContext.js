@@ -64,7 +64,7 @@ class StateProvider extends Component {
   }
 
   subscribePedometer = () => {
-    this.pedometerSubscription = Pedometer.watchStepCount(result => {
+    this.pedometerSubscription = Pedometer.watchStepCount(step => {
       this.walk(step)
     });
 
@@ -92,8 +92,8 @@ class StateProvider extends Component {
    * 타이머를 두어 일정 시간이 지난 뒤 다시 걷지 않는 상태로 만든다.
    */
   walk(step) {
-    if (isFinding || isDesiringItem) {
-      if (!isAppForeground) {
+    if (this.state.isFinding || this.state.isDesiringItem) {
+      if (!this.state.isAppForeground) {
         this.setState({ previousStep: step })
         return
       }
