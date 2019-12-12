@@ -14,7 +14,7 @@ class StateProvider extends Component {
     this.state = {
       // 0: good, 1: better, 2: best
       growthStage: 0,
-      hatchingLevel: 0,
+      hatchingLevel: Constants.EGG,
 
       /**
        * 0 ~ THRESHOLD_BETTER : good
@@ -49,7 +49,6 @@ class StateProvider extends Component {
       isHappy: false,
 
       message: "",
-      // TODO : 말풍선
     };
 
     this.actions = {
@@ -99,7 +98,15 @@ class StateProvider extends Component {
    * 타이머를 두어 일정 시간이 지난 뒤 다시 걷지 않는 상태로 만든다.
    */
   walk(step) {
-    if (this.state.isFinding || this.state.isDesiringItem) {
+    // 시연을 위해 better 단계 이상에서만.
+    if (this.state.hatchingLevel != Constants.BORN) return
+    if (this.state.growthStage < 1) return
+
+    if (this.state.isDrinking
+      || this.state.isHappy
+      || this.state.isEvolving
+      || this.state.isFinding 
+      || this.state.isDesiringItem) {
       if (!this.state.isAppForeground) {
         this.setState({ previousStep: step })
         return
@@ -150,9 +157,9 @@ class StateProvider extends Component {
   }
 
   hatch() {
-    this.setState({ hatchingLevel: 1 }, () => {
+    this.setState({ hatchingLevel: Constants.HATCHING }, () => {
       setTimeout(() => {
-        this.setState({ hatchingLevel: 2 })
+        this.setState({ hatchingLevel: Constants.BORN })
       }, Constants.HATCHING_MILLISECONDS)
     })
   }
@@ -160,19 +167,33 @@ class StateProvider extends Component {
   desireItem() {
     this.desireInterval = setInterval(() => {
       if (!this.state.isDesiringItem) {
-        this.setState({ isDesiringItem: true })
+        // 시연을 위해 better, best 단계에서만
+        if (this.state.growthStage != 0) this.setDesiringItemRandomly()
       }
     }, Constants.GETTING_THIRSTY_MILLISECONDS)
   }
 
+  // 일정 확률로 아이템을 원하는 상태로 만든다.
+  setDesiringItemRandomly() {
+    const x = Math.random()
+    if (x <= Constants.CHANCE_TO_GET_DESIRING
+      && !!this.state.isDesiringItem) {
+      this.setState({ isDesiringItem: true }, () => {
+        // TODO : 아이템 필요해요.
+        this.setMessage("")
+      })
+    }
+  }
+
   becomeThirsty() {
     this.drinkInterval = setInterval(() => {
-      this.setThirsty()
+      // 시연을 위해 good 단계에서만
+      if (this.state.growthStage == 0) this.setThirstyRandomly()
     }, Constants.GET_THIRSTY_MILLISECONDS)
   }
 
   // 일정 확률로 목 마른 상태로 만든다.
-  setThirsty() {
+  setThirstyRandomly() {
     const x = Math.random()
     if (x <= Constants.CHANCE_TO_GET_THIRSTY
       && !!this.state.isThirsty) {
