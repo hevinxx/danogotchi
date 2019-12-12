@@ -12,6 +12,7 @@ class StateProvider extends Component {
     
     const growthStages = [0, Constants.THRESHOLD_BETTER, Constants.THRESHOLD_BEST];
     this.state = {
+      characterState: Constants.CHARACTER_STATE_DEFAULT,
       // 0: good, 1: better, 2: best
       growthStage: 0,
       /**
@@ -49,7 +50,8 @@ class StateProvider extends Component {
     };
 
     this.actions = {
-      walk: step => this.walk(step),
+      drink: this.drink,
+      pickUpItem: this.pickUpItem,
     };
   }
 
