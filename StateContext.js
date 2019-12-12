@@ -51,7 +51,9 @@ class StateProvider extends Component {
 
     this.actions = {
       drink: this.drink,
+      desireItem: this.desireItem,
       pickUpItem: this.pickUpItem,
+      becomeThirsty: this.becomeThirsty,
     };
   }
 
@@ -105,11 +107,17 @@ class StateProvider extends Component {
     const dStep = step - this.state.previousStep
     const distanceToItem = Math.max(this.state.distanceToItem - dStep, Constants.FIND_ITEM_DISTANCE)
 
-    this.setState({ 
-      distanceToItem: distanceToItem,
-      previousStep: step,
-      isWalking: true
-    }, () => {
+    // 이미 isWalking이라면 다시 true할 필요 없다.
+    const newState = this.state.isWalking
+      ? {
+        distanceToItem: distanceToItem,
+        previousStep: step
+      } : {
+        distanceToItem: distanceToItem,
+        previousStep: step,
+        isWalking: true
+      }
+    this.setState(newState, () => {
       // 타이머를 설정한다.
       this.setStopWalkingTimer()
       // 아이템과의 거리가 FIND_ITEM_DISTANCE 보다 가까워졌을 시 findItem을 실행한다.
@@ -137,7 +145,6 @@ class StateProvider extends Component {
     return Math.max(Math.floor(Math.random() * Constants.MAX_DISTANCE), Constants.FIND_ITEM_DISTANCE + 10)
   }
 
-  // TODO : 처음 호출 하는 곳이 없다.
   desireItem() {
     this.desireInterval = setInterval(() => {
       if (!this.state.isDesiringItem) {
@@ -146,7 +153,6 @@ class StateProvider extends Component {
     }, Constants.GETTING_THIRSTY_MILLISECONDS)
   }
 
-  // TODO : 처음 호출 하는 곳이 없다..
   becomeThirsty() {
     this.drinkInterval = setInterval(() => {
       this.setThirsty()
@@ -173,7 +179,7 @@ class StateProvider extends Component {
   }
 
   findItem() {
-    this.setState({ isFinding: true })
+    this.state.isFinding || this.setState({ isFinding: true })
   }
 
   pickUpItem() {
