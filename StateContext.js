@@ -14,6 +14,8 @@ class StateProvider extends Component {
     this.state = {
       // 0: good, 1: better, 2: best
       growthStage: 0,
+      hatchingLevel: 0,
+
       /**
        * 0 ~ THRESHOLD_BETTER : good
        * THRESHOLD_BETTER ~ THRESHOLD_BEST : better
@@ -40,6 +42,7 @@ class StateProvider extends Component {
       lovePointToIncrease: 100,
  
       isThirsty: false,
+      isDrinking: false,
 
       isEvolving: false,
 
@@ -50,10 +53,12 @@ class StateProvider extends Component {
     };
 
     this.actions = {
+      hatch: this.hatch,
       drink: this.drink,
       desireItem: this.desireItem,
       pickUpItem: this.pickUpItem,
       becomeThirsty: this.becomeThirsty,
+      evolve: this.evolve,
     };
   }
 
@@ -127,9 +132,8 @@ class StateProvider extends Component {
 
   // 걸었다는 신호가 들어온 뒤 WALKING_STOPPER_MILLISECONDS가 지나면 걷지 않는 상태로 만든다.
   setStopWalkingTimer() {
-    this.walkingStopper = setTimeout(() => {
+    setTimeout(() => {
       this.setState({ isWalking: false })
-      this.walkingStopper = 0
     }, Constants.WALKING_STOPPER_MILLISECONDS)
   }
 
@@ -143,6 +147,14 @@ class StateProvider extends Component {
   // 다음 아이템과의 거리를 결정한다.
   generateNextDistance() {
     return Math.max(Math.floor(Math.random() * Constants.MAX_DISTANCE), Constants.FIND_ITEM_DISTANCE + 10)
+  }
+
+  hatch() {
+    this.setState({ hatchingLevel: 1 }, () => {
+      setTimeout(() => {
+        this.setState({ hatchingLevel: 2 })
+      }, Constants.HATCHING_MILLISECONDS)
+    })
   }
 
   desireItem() {
@@ -172,10 +184,20 @@ class StateProvider extends Component {
   }
 
   drink() {
-    this.setState({ isThirsty: false}, () => {
+    this.setState({ 
+      isDrinking: true,
+      isThirsty: false
+    }, () => {
+      this.setStopDrinkingTimer()
       // TODO : 너도 마실래?
       this.setMessage("")
     })
+  }
+
+  setStopDrinkingTimer() {
+    setTimeout(() => {
+      this.setState({ isDrinking: false })
+    }, Constants.DRINKING_STOPPER_MILLISECONDS)
   }
 
   findItem() {
@@ -187,6 +209,7 @@ class StateProvider extends Component {
       isFinding: false,
       isHappy: true
     }, () => {
+      this.setHappyStopper()
       // TODO : 아이템을 얻었다!
       this.setMessage("")
     })
@@ -194,9 +217,11 @@ class StateProvider extends Component {
     this.earnLovePoint()
   }
 
-  // TODO: 행복해 하는 게 끝나면 불려야 한다.
-  completeHappy() {
-    this.setState({ isHappy: false })
+  setHappyStopper() {
+    this.happyStopper = setTimeout(() => {
+      this.setState({ isHappy: false })
+      this.happyStopper = 0
+    }, Constants.HAPPY_STOPPER_MILLISECONDS)
   }
 
   // 캐릭터의 상태와는 별개로, 다음 아이템은 항상 정해져 있다.
@@ -211,18 +236,7 @@ class StateProvider extends Component {
   earnLovePoint() {
     const lovePoint = this.state.lovePoint + this.state.lovePointToIncrease
     const prevStage = this.state.growthStage
-    this.setState({ lovePoint: lovePoint }, () => {
-      this.fillLovePointBar(prevStage, lovePoint)
-    })
-  }
-
-  fillLovePointBar(prevStage, lovePoint) {
-    // TODO : 바 채우는 애니메이션
-    // 다 찼을 경우
-    if (lovePoint >= this.growthStages[prevStage]) {
-      // 남은 만큼 더 채우기
-      this.evolve()
-    }
+    this.setState({ lovePoint: lovePoint })
   }
 
   evolve() {
@@ -230,14 +244,16 @@ class StateProvider extends Component {
       growthStage: Math.min(prevState.growthStage + 1, this.growthStages.length),
       isEvolving: true
     }), () => {
+      this.setStopEvolvingTimer()
       // TODO : 진화했다!
       this.setMessage("")
     })
   }
 
-  // TODO : 진화가 끝났으면 불려야 한다.
-  completeEvolve() {
-    this.setState({ isEvolving: false })
+  setStopEvolvingTimer() {
+    setTimeout(() => {
+      this.setState({ isEvolving: false })
+    }, Constants.EVOLVE_STOPPER_MILLISECONDS)
   }
 
   setMessage(message) {
