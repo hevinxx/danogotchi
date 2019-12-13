@@ -31,7 +31,6 @@ class StateProvider extends Component {
       isWalking: false,
       isFinding: false,
 
-      previousStep: 0,
       isPedometerAvailable: "checking",
 
       /**
@@ -41,7 +40,8 @@ class StateProvider extends Component {
        */
       isDesiringItem: false,
       desiredItemId: null,
-      distanceToItem: 100,
+
+      isGoing: false,
 
       isThirsty: false,
       isDrinking: false,
@@ -60,7 +60,8 @@ class StateProvider extends Component {
       pickUpItem: this.pickUpItem,
       becomeThirsty: this.becomeThirsty,
       evolve: this.evolve,
-      happy: this.happy
+      happy: this.happy,
+      go: this.go,
     };
   }
 
@@ -117,7 +118,7 @@ class StateProvider extends Component {
       this.state.isDesiringItem
     ) {
       if (!this.state.isAppForeground) {
-        this.setState({ previousStep: step });
+        this.previousStep = step;
         return;
       }
     }
@@ -125,29 +126,24 @@ class StateProvider extends Component {
     // 타이머가 있었을 시 초기화한다.
     this.clearStopWalkingTimer();
 
-    const dStep = step - this.state.previousStep;
+    const dStep = step - this.previousStep;
     const distanceToItem = Math.max(
-      this.state.distanceToItem - dStep,
+      this.distanceToItem - dStep,
       Constants.FIND_ITEM_DISTANCE
     );
 
     // 이미 isWalking이라면 다시 true할 필요 없다.
-    const newState = this.state.isWalking
-      ? {
-          distanceToItem: distanceToItem,
-          previousStep: step
-        }
-      : {
-          distanceToItem: distanceToItem,
-          previousStep: step,
-          isWalking: true
-        };
-    this.setState(newState, () => {
-      // 타이머를 설정한다.
-      this.setStopWalkingTimer();
-      // 아이템과의 거리가 FIND_ITEM_DISTANCE 보다 가까워졌을 시 findItem을 실행한다.
-      distanceToItem <= Constants.FIND_ITEM_DISTANCE && this.findItem();
-    });
+    this.distanceToItem = distanceToItem
+    this.previousStep = step
+
+    if (!this.state.isWalking) {
+      this.setState(newState, () => {
+        // 타이머를 설정한다.
+        this.setStopWalkingTimer();
+        // 아이템과의 거리가 FIND_ITEM_DISTANCE 보다 가까워졌을 시 findItem을 실행한다.
+        distanceToItem <= Constants.FIND_ITEM_DISTANCE && this.findItem();
+      });
+    }
   };
 
   // 걸었다는 신호가 들어온 뒤 WALKING_STOPPER_MILLISECONDS가 지나면 걷지 않는 상태로 만든다.
@@ -193,13 +189,23 @@ class StateProvider extends Component {
   // 일정 확률로 아이템을 원하는 상태로 만든다.
   setDesiringItemRandomly = () => {
     const x = Math.random();
-    if (x <= Constants.CHANCE_TO_GET_DESIRING && !this.state.isDesiringItem) {
+    if (x <= Constants.CHANCE_TO_GET_DESIRING 
+      && !this.state.isDesiringItem
+      && !this.state.isGoing) {
       this.setState({ isDesiringItem: true }, () => {
         // TODO : 아이템 필요해요.
         this.setMessage("");
       });
     }
   };
+
+  go = () => {
+    this.setState({ isGoing: true })
+  }
+
+  stop = () => {
+    this.setState({ isGoing: false })
+  }
 
   becomeThirsty = () => {
     this.drinkInterval = setInterval(() => {
@@ -215,7 +221,9 @@ class StateProvider extends Component {
   // 일정 확률로 목 마른 상태로 만든다.
   setThirstyRandomly = () => {
     const x = Math.random();
-    if (x <= Constants.CHANCE_TO_GET_THIRSTY && !this.state.isThirsty) {
+    if (x <= Constants.CHANCE_TO_GET_THIRSTY 
+      && !this.state.isThirsty
+      && !this.state.isGoing) {
       this.setState({ isThirsty: true }, () => {
         // TODO : 목 말라요
         this.setMessage("");
@@ -261,6 +269,7 @@ class StateProvider extends Component {
       }
     );
     this.setNextItem();
+    this.stop();
     this.earnLovePoint(this.generateEarningPoint());
   };
 
@@ -274,9 +283,9 @@ class StateProvider extends Component {
   // 캐릭터의 상태와는 별개로, 다음 아이템은 항상 정해져 있다.
   setNextItem = () => {
     const nextItemIndex = Math.floor(Math.random() * items.length);
+    this.distanceToItem = this.generateNextDistance()
     this.setState({
       desiredItemId: items[nextItemIndex].id,
-      distanceToItem: this.generateNextDistance()
     });
   };
 

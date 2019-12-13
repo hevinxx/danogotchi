@@ -46,7 +46,7 @@ const getSpriteIndex = (growthStage, state) => {
     }
   } else if (growthStage === 1) {
     if (state === CHARACTER_STATE_WALKING) {
-      startIndex = 32;
+      startIndex = 72;
     } else if (
       state === CHARACTER_STATE_THIRSTY ||
       state === CHARACTER_STATE_DESIRING
@@ -62,8 +62,8 @@ const getSpriteIndex = (growthStage, state) => {
       startIndex = 32;
     }
   } else {
-    if (state === 2) {
-      startIndex = 52;
+    if (state === CHARACTER_STATE_WALKING) {
+      startIndex = 76;
     } else if (
       state === CHARACTER_STATE_THIRSTY ||
       state === CHARACTER_STATE_DESIRING
@@ -129,7 +129,7 @@ class MainArea extends Component {
       { loop: true }
     );
 
-    if (this.props.data.isWalking) {
+    if (this.props.characterState === CHARACTER_STATE_WALKING) {
       this.animate = Animated.loop(
         Animated.timing(this.state.bgPos, {
           duration: 15000,
@@ -143,14 +143,21 @@ class MainArea extends Component {
       if (this.animate) this.animate.stop();
     }
   };
+
   onPress = () => {
     if (this.props.data.hatchingLevel !== BORN) {
       this.props.actions.hatch();
       return;
     }
 
-    if (this.props.data.isThirsty) {
+    if (this.props.characterState === CHARACTER_STATE_THIRSTY) {
       this.props.actions.drink();
+      return;
+    }
+
+    if (this.props.characterState === CHARACTER_STATE_DESIRING) {
+      this.props.actions.go();
+      return;
     }
 
     this.props.actions.happy();
@@ -205,7 +212,7 @@ class MainArea extends Component {
             />
           </View>
         ) : null}
-        {this.props.data.isWalking ? (
+        {this.props.data.isGoing ? (
           <Animated.View
             style={{
               left: this.state.bgPos
@@ -229,14 +236,14 @@ class MainArea extends Component {
 
         <View style={styles.characterContainer}>
           <TouchableOpacity onPress={this.onPress}>
-            {this.props.data.isDesiringItem &&
-            characterState !== CHARACTER_STATE_EVOLVING ? (
+            {characterState === CHARACTER_STATE_DESIRING 
+            && !this.props.data.isGoing ? (
               <View style={styles.bubbleContainer}>
                 <Image source={require("./assets/want_03_proteinchoco.png")} />
               </View>
             ) : null}
-            {this.props.data.isThirsty &&
-            characterState !== CHARACTER_STATE_EVOLVING ? (
+            {characterState === CHARACTER_STATE_THIRSTY
+            && !this.props.data.isGoing ? (
               <View style={styles.bubbleContainer}>
                 <Image source={require("./assets/want_01_water.png")} />
               </View>
@@ -246,7 +253,7 @@ class MainArea extends Component {
               ref={ref => (this.character = ref)}
               source={require("./assets/danogotchi_character_last.png")}
               columns={4}
-              rows={18}
+              rows={20}
               animations={{
                 hatch1: [0, 1, 2, 3],
                 hatch2: [4, 5, 6, 7],
