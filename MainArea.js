@@ -167,6 +167,11 @@ class MainArea extends Component {
       return;
     }
 
+    if (this.props.characterState === CHARACTER_STATE_FINDING) {
+      this.itemAnimate.start()
+      return;
+    }
+
     this.props.actions.happy();
   };
 
@@ -214,9 +219,10 @@ class MainArea extends Component {
             bottom: 400
           }}
         >
-          <Image source={require("./assets/kong.png")} />
+          {characterState === CHARACTER_STATE_FINDING ?(
+            <Image source={require("./assets/kong.png")} />
+          ) : null}
         </Animated.View>
-        {/* TODO: 배경 로직어떻게 해야..? */}
         {characterState === CHARACTER_STATE_EVOLVING ? (
           <View>
             <SpriteSheet
@@ -259,11 +265,14 @@ class MainArea extends Component {
               <View style={styles.bubbleContainer}>
                 <Image source={require("./assets/want_03_proteinchoco.png")} />
               </View>
-            ) : null}
-            {characterState === CHARACTER_STATE_THIRSTY &&
-            !this.props.data.isGoing ? (
+            ) : characterState === CHARACTER_STATE_THIRSTY
+            && !this.props.data.isGoing ? (
               <View style={styles.bubbleContainer}>
                 <Image source={require("./assets/want_01_water.png")} />
+              </View>
+            ) : characterState === CHARACTER_STATE_FINDING ? (
+              <View style={styles.bubbleContainer}>
+                <Image source={require("./assets/want_04.png")} />
               </View>
             ) : null}
 

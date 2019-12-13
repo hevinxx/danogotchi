@@ -36,7 +36,6 @@ class StateProvider extends Component {
       /**
        * desiredItemId는 항상 하나를 갖고 있는다.
        * isDesiringItem이 false일 때는 드러나지 않다가 true가 될 때 캐릭터가 요청한다.
-       * distanceToItem이 이 FIND_ITEM_DISTANCE되면 아이템을 만난다.
        */
       isDesiringItem: false,
       desiredItemId: null,
@@ -53,6 +52,9 @@ class StateProvider extends Component {
       message: ["몽환의 숲에 온 걸 환영해!"]
     };
 
+    this.distanceToItem = 40;
+    this.previousStep = 0;
+
     this.actions = {
       hatch: this.hatch,
       drink: this.drink,
@@ -67,6 +69,7 @@ class StateProvider extends Component {
 
   componentDidMount() {
     this.subscribePedometer();
+    this.setNextItem();
   }
 
   componentWillUnmount() {
@@ -105,10 +108,17 @@ class StateProvider extends Component {
    * 걷는 상태로 만든다.
    * 타이머를 두어 일정 시간이 지난 뒤 다시 걷지 않는 상태로 만든다.
    */
-  walk = step => {
+  walk = result => {
     // 시연을 위해 better 단계 이상에서만.
     if (this.state.hatchingLevel != Constants.BORN) return;
     if (this.state.growthStage < 1) return;
+
+    const dStep = result.steps - this.previousStep;
+    
+    const distanceToItem = Math.max(this.distanceToItem - dStep,0);
+
+    this.distanceToItem = distanceToItem
+    this.previousStep = result.steps
 
     if (
       this.state.isDrinking ||
@@ -118,7 +128,6 @@ class StateProvider extends Component {
       this.state.isDesiringItem
     ) {
       if (!this.state.isAppForeground) {
-        this.previousStep = step;
         return;
       }
     }
@@ -126,24 +135,15 @@ class StateProvider extends Component {
     // 타이머가 있었을 시 초기화한다.
     this.clearStopWalkingTimer();
 
-    const dStep = step - this.previousStep;
-    const distanceToItem = Math.max(
-      this.distanceToItem - dStep,
-      Constants.FIND_ITEM_DISTANCE
-    );
-
-    // 이미 isWalking이라면 다시 true할 필요 없다.
-    this.distanceToItem = distanceToItem;
-    this.previousStep = step;
-
     // 타이머를 설정한다.
     this.setStopWalkingTimer();
 
+    // 아이템과의 거리가 0보다 가까워졌을 시 findItem을 실행한다.
+    distanceToItem <= 0 && this.findItem();
+    
+    // 이미 isWalking이라면 다시 true할 필요 없다.
     if (!this.state.isWalking) {
-      this.setState({ isWalking: true }, () => {
-        // 아이템과의 거리가 FIND_ITEM_DISTANCE 보다 가까워졌을 시 findItem을 실행한다.
-        distanceToItem <= Constants.FIND_ITEM_DISTANCE && this.findItem();
-      });
+      this.setState({ isWalking: true });
     }
   };
 
@@ -164,10 +164,7 @@ class StateProvider extends Component {
 
   // 다음 아이템과의 거리를 결정한다.
   generateNextDistance = () => {
-    return Math.max(
-      Math.floor(Math.random() * Constants.MAX_DISTANCE),
-      Constants.FIND_ITEM_DISTANCE + 10
-    );
+    return Math.floor(Math.random() * Constants.MAX_DISTANCE)
   };
 
   hatch = () => {
