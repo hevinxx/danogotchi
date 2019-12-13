@@ -169,11 +169,16 @@ class MainArea extends Component {
 
     if (this.props.characterState === CHARACTER_STATE_FINDING) {
       this.itemAnimate.start()
+      this.props.actions.setMessage(["헐 달콩이다!"])
       return;
     }
 
     this.props.actions.happy();
   };
+
+  pickUpItem = () => {
+    this.props.actions.pickUpItem()
+  }
 
   play = (type, option) => {
     const { fps } = this.state;
@@ -211,18 +216,22 @@ class MainArea extends Component {
             }}
           />
         </View>
+        {characterState === CHARACTER_STATE_FINDING ?(
+
         <Animated.View
           style={{
             position: "absolute",
-            zIndex: 10,
+            zIndex: 11,
             right: this.state.itemPos,
-            bottom: 400
+            bottom: 210
           }}
         >
-          {characterState === CHARACTER_STATE_FINDING ?(
+          <TouchableOpacity onPress={this.pickUpItem}>
             <Image source={require("./assets/kong.png")} />
-          ) : null}
+          </TouchableOpacity>
         </Animated.View>
+
+        ) : null}
         {characterState === CHARACTER_STATE_EVOLVING ? (
           <View>
             <SpriteSheet

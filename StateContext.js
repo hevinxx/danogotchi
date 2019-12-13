@@ -63,7 +63,8 @@ class StateProvider extends Component {
       becomeThirsty: this.becomeThirsty,
       evolve: this.evolve,
       happy: this.happy,
-      go: this.go
+      go: this.go,
+      setMessage: this.setMessage
     };
   }
 
@@ -141,16 +142,16 @@ class StateProvider extends Component {
     // 아이템과의 거리가 0보다 가까워졌을 시 findItem을 실행한다.
     distanceToItem <= 0 && this.findItem();
     
-    // 이미 isWalking이라면 다시 true할 필요 없다.
-    if (!this.state.isWalking) {
+    // 이미 isWalking, isFinding이라면 다시 true할 필요 없다.
+    if (!this.state.isWalking && !this.state.isFinding) {
       this.setState({ isWalking: true });
     }
   };
 
   // 걸었다는 신호가 들어온 뒤 WALKING_STOPPER_MILLISECONDS가 지나면 걷지 않는 상태로 만든다.
   setStopWalkingTimer = () => {
-    if (this.walkTimer) clearTimeout(this.walkTimer);
-    this.walkTimer = setTimeout(() => {
+    if (this.walkingStopper) clearTimeout(this.walkingStopper);
+    this.walkingStopper = setTimeout(() => {
       this.setState({ isWalking: false });
     }, Constants.WALKING_STOPPER_MILLISECONDS);
   };
@@ -198,10 +199,10 @@ class StateProvider extends Component {
       !this.state.isDesiringItem &&
       !this.state.isGoing
     ) {
-      this.setState({ isDesiringItem: true }, () => {
-        // TODO : 아이템 필요해요.
-        this.setMessage([]);
-      });
+      this.setState({ isDesiringItem: true })
+      if (this.state.growthStage == 1) {
+        this.setMessage(["몽환의 숲에서만 구할 수 있는", "마법의 달콩이가 있대!"])
+      }
     }
   };
 
@@ -269,7 +270,9 @@ class StateProvider extends Component {
   };
 
   findItem = () => {
-    this.state.isFinding || this.setState({ isFinding: true });
+    if (!this.state.isFinding) {
+      this.setState({ isFinding: true });
+    }  
   };
 
   pickUpItem = () => {
@@ -280,8 +283,7 @@ class StateProvider extends Component {
       },
       () => {
         this.setHappyStopper();
-        // TODO : 아이템을 얻었다!
-        this.setMessage([]);
+        this.setMessage(["오늘도 단백질 보충 완료-!"]);
       }
     );
     this.setNextItem();
@@ -325,22 +327,20 @@ class StateProvider extends Component {
           prevState.growthStage + 1,
           this.growthStages.length
         ),
-        isEvolving: true
+        isEvolving: true,
+        message: this.state.growthStage === 1
+        ? ["축하해! 우리 모두", "Best version에 더 가까워졌어"]
+        : ["축하해!", "드디어 best version이 됐어"]
       }),
       () => {
         this.setStopEvolvingTimer();
-        this.setMessage(
-          this.state.growthStage === 1
-            ? ["축하해! 우리 모두", "Best version에 더 가까워졌어"]
-            : ["축하해!", "드디어 best version이 됐어"]
-        );
       }
     );
   };
 
   setStopEvolvingTimer = () => {
     setTimeout(() => {
-      this.setState({ isEvolving: false }, () => {
+      this.setState({ isEvolving: false, message: [] }, () => {
         // 시연용으로 better 이상에서만
 
         if (this.state.growthStage > 0) this.desireItem();

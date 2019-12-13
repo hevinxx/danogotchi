@@ -51,11 +51,12 @@ class MainView extends React.Component {
               lineHeight: 30
             }}
           >
-            {this.props.homeProvider.state.message.map(e => (
-              <>
+            {this.props.homeProvider.state.message.map((e, idx) => (
+              <React.Fragment key={idx}>
+
                 {e}
                 {"\n"}
-              </>
+              </React.Fragment>
             ))}
           </Text>
         </View>
