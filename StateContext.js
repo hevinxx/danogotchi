@@ -136,10 +136,11 @@ class StateProvider extends Component {
     this.distanceToItem = distanceToItem
     this.previousStep = step
 
+    // 타이머를 설정한다.
+    this.setStopWalkingTimer();
+    
     if (!this.state.isWalking) {
-      this.setState(newState, () => {
-        // 타이머를 설정한다.
-        this.setStopWalkingTimer();
+      this.setState({ isWalking: true }, () => {
         // 아이템과의 거리가 FIND_ITEM_DISTANCE 보다 가까워졌을 시 findItem을 실행한다.
         distanceToItem <= Constants.FIND_ITEM_DISTANCE && this.findItem();
       });
