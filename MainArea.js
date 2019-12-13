@@ -102,14 +102,14 @@ class MainArea extends Component {
   });
 
   componentDidUpdate = (prevProps, prevState) => {
-    if (this.props.hachingLevel !== BORN) {
+    if (this.props.data.hatchingLevel !== BORN) {
       this.bornBg.play({
         type: "default",
         fps: 3,
         resetAfterFinish: true,
         loop: true
       });
-      this.play(this.props.hachingLevel === EGG ? "hatch1" : "hatch2", {
+      this.play(this.props.data.hatchingLevel === EGG ? "hatch1" : "hatch2", {
         loop: true
       });
       return;
@@ -125,7 +125,7 @@ class MainArea extends Component {
       Vibration.vibrate(3000);
     }
     this.play(
-      getAnimationName(this.props.growthStage, this.props.characterState),
+      getAnimationName(this.props.data.growthStage, this.props.characterState),
       { loop: true }
     );
 
@@ -144,7 +144,7 @@ class MainArea extends Component {
     }
   };
   onPress = () => {
-    if (this.props.hachingLevel !== BORN) {
+    if (this.props.data.hatchingLevel !== BORN) {
       this.props.actions.hatch();
       return;
     }

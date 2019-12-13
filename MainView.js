@@ -31,9 +31,7 @@ class MainView extends React.Component {
     return (
       <>
         <MainArea
-          growthStage={this.props.homeProvider.state.growthStage}
           characterState={characterState}
-          hachingLevel={this.props.homeProvider.state.hatchingLevel}
           actions={this.props.homeProvider.actions}
           data={this.props.homeProvider.state} // TODO: 위에거랑 합치기
         />

@@ -204,8 +204,9 @@ class StateProvider extends Component {
   becomeThirsty = () => {
     this.drinkInterval = setInterval(() => {
       // 시연을 위해 good 단계에서만
-      if (this.state.growthStage == 0) {
-        console.log("qqqq");
+      if (this.state.growthStage == 0 
+        && !this.state.isThirsty
+        && !this.state.isDrinking) {
         this.setThirstyRandomly();
       }
     }, Constants.GET_THIRSTY_MILLISECONDS);
