@@ -102,6 +102,13 @@ class MainArea extends Component {
   });
 
   componentDidUpdate = (prevProps, prevState) => {
+    if (prevProps.data.lovePoint !== this.props.data.lovePoint) {
+      this.pointBar.play({
+        type: "default",
+        fps: 3,
+        resetAfterFinish: true
+      });
+    }
     if (this.props.data.hatchingLevel !== BORN) {
       this.bornBg.play({
         type: "default",
@@ -188,6 +195,17 @@ class MainArea extends Component {
 
     return (
       <View style={styles.mainArea}>
+        <View style={styles.pointBar}>
+          <SpriteSheet
+            ref={ref => (this.pointBar = ref)}
+            source={require("./assets/danogotchi_love.png")}
+            columns={7}
+            rows={1}
+            animations={{
+              default: [0, 1, 2, 3, 4, 5, 6]
+            }}
+          />
+        </View>
         <Animated.View
           style={{
             position: "absolute",
@@ -236,14 +254,14 @@ class MainArea extends Component {
 
         <View style={styles.characterContainer}>
           <TouchableOpacity onPress={this.onPress}>
-            {characterState === CHARACTER_STATE_DESIRING 
-            && !this.props.data.isGoing ? (
+            {characterState === CHARACTER_STATE_DESIRING &&
+            !this.props.data.isGoing ? (
               <View style={styles.bubbleContainer}>
                 <Image source={require("./assets/want_03_proteinchoco.png")} />
               </View>
             ) : null}
-            {characterState === CHARACTER_STATE_THIRSTY
-            && !this.props.data.isGoing ? (
+            {characterState === CHARACTER_STATE_THIRSTY &&
+            !this.props.data.isGoing ? (
               <View style={styles.bubbleContainer}>
                 <Image source={require("./assets/want_01_water.png")} />
               </View>
@@ -405,6 +423,11 @@ const styles = StyleSheet.create({
   mainArea: {
     flex: 1,
     overflow: "visible"
+  },
+  pointBar: {
+    position: "absolute",
+    top: 0,
+    zIndex: 10
   },
   background: {
     left: -100
