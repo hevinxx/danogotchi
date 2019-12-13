@@ -50,7 +50,7 @@ class StateProvider extends Component {
 
       isHappy: false,
 
-      message: ""
+      message: ["몽환의 숲에 온 걸 환영해!"]
     };
 
     this.actions = {
@@ -61,7 +61,7 @@ class StateProvider extends Component {
       becomeThirsty: this.becomeThirsty,
       evolve: this.evolve,
       happy: this.happy,
-      go: this.go,
+      go: this.go
     };
   }
 
@@ -133,12 +133,12 @@ class StateProvider extends Component {
     );
 
     // 이미 isWalking이라면 다시 true할 필요 없다.
-    this.distanceToItem = distanceToItem
-    this.previousStep = step
+    this.distanceToItem = distanceToItem;
+    this.previousStep = step;
 
     // 타이머를 설정한다.
     this.setStopWalkingTimer();
-    
+
     if (!this.state.isWalking) {
       this.setState({ isWalking: true }, () => {
         // 아이템과의 거리가 FIND_ITEM_DISTANCE 보다 가까워졌을 시 findItem을 실행한다.
@@ -173,7 +173,13 @@ class StateProvider extends Component {
   hatch = () => {
     this.setState({ hatchingLevel: Constants.HATCHING }, () => {
       setTimeout(() => {
-        this.setState({ hatchingLevel: Constants.BORN }, this.becomeThirsty);
+        this.setState(
+          {
+            hatchingLevel: Constants.BORN,
+            message: ["안녕 나는 숲의 요정 다노고치야"]
+          },
+          this.becomeThirsty
+        );
       }, Constants.HATCHING_MILLISECONDS);
     });
   };
@@ -190,30 +196,34 @@ class StateProvider extends Component {
   // 일정 확률로 아이템을 원하는 상태로 만든다.
   setDesiringItemRandomly = () => {
     const x = Math.random();
-    if (x <= Constants.CHANCE_TO_GET_DESIRING 
-      && !this.state.isDesiringItem
-      && !this.state.isGoing) {
+    if (
+      x <= Constants.CHANCE_TO_GET_DESIRING &&
+      !this.state.isDesiringItem &&
+      !this.state.isGoing
+    ) {
       this.setState({ isDesiringItem: true }, () => {
         // TODO : 아이템 필요해요.
-        this.setMessage("");
+        this.setMessage([]);
       });
     }
   };
 
   go = () => {
-    this.setState({ isGoing: true })
-  }
+    this.setState({ isGoing: true });
+  };
 
   stop = () => {
-    this.setState({ isGoing: false })
-  }
+    this.setState({ isGoing: false });
+  };
 
   becomeThirsty = () => {
     this.drinkInterval = setInterval(() => {
       // 시연을 위해 good 단계에서만
-      if (this.state.growthStage == 0 
-        && !this.state.isThirsty
-        && !this.state.isDrinking) {
+      if (
+        this.state.growthStage == 0 &&
+        !this.state.isThirsty &&
+        !this.state.isDrinking
+      ) {
         this.setThirstyRandomly();
       }
     }, Constants.GET_THIRSTY_MILLISECONDS);
@@ -222,13 +232,22 @@ class StateProvider extends Component {
   // 일정 확률로 목 마른 상태로 만든다.
   setThirstyRandomly = () => {
     const x = Math.random();
-    if (x <= Constants.CHANCE_TO_GET_THIRSTY 
-      && !this.state.isThirsty
-      && !this.state.isGoing) {
-      this.setState({ isThirsty: true }, () => {
-        // TODO : 목 말라요
-        this.setMessage("");
-      });
+    if (
+      x <= Constants.CHANCE_TO_GET_THIRSTY &&
+      !this.state.isThirsty &&
+      !this.state.isGoing
+    ) {
+      this.setState(
+        {
+          isThirsty: true
+        },
+        () => {
+          this.setMessage([
+            "어제 술을 너무 많이 마셔서",
+            "수분 보충이 필요해..."
+          ]);
+        }
+      );
     }
   };
 
@@ -240,8 +259,7 @@ class StateProvider extends Component {
       },
       () => {
         this.setStopDrinkingTimer();
-        // TODO : 너도 마실래?
-        this.setMessage("");
+        this.setMessage(["(꼴깍꼴깍)..."]);
       }
     );
   };
@@ -266,7 +284,7 @@ class StateProvider extends Component {
       () => {
         this.setHappyStopper();
         // TODO : 아이템을 얻었다!
-        this.setMessage("");
+        this.setMessage([]);
       }
     );
     this.setNextItem();
@@ -284,9 +302,9 @@ class StateProvider extends Component {
   // 캐릭터의 상태와는 별개로, 다음 아이템은 항상 정해져 있다.
   setNextItem = () => {
     const nextItemIndex = Math.floor(Math.random() * items.length);
-    this.distanceToItem = this.generateNextDistance()
+    this.distanceToItem = this.generateNextDistance();
     this.setState({
-      desiredItemId: items[nextItemIndex].id,
+      desiredItemId: items[nextItemIndex].id
     });
   };
 
@@ -314,8 +332,11 @@ class StateProvider extends Component {
       }),
       () => {
         this.setStopEvolvingTimer();
-        // TODO : 진화했다!
-        this.setMessage("");
+        this.setMessage(
+          this.state.growthStage === 1
+            ? ["축하해! 우리 모두", "Best version에 더 가까워졌어"]
+            : ["축하해!", "드디어 best version이 됐어"]
+        );
       }
     );
   };

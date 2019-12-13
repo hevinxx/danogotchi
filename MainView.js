@@ -1,8 +1,7 @@
 import React from "react";
-import { View, Button, TouchableOpacity, Text } from "react-native";
+import { View, Image, Text } from "react-native";
 import MainArea from "./MainArea";
 import * as Constants from "./Constants";
-import DescriptionArea from "./DescriptionArea";
 import { withState } from "./StateContext";
 
 const getCharacterState = state => {
@@ -15,12 +14,14 @@ const getCharacterState = state => {
   } else if (state.isFinding) {
     return Constants.CHARACTER_STATE_FINDING;
   } else if (state.isGoing) {
-      return state.isWalking ? Constants.CHARACTER_STATE_WALKING : Constants.CHARACTER_STATE_DEFAULT
+    return state.isWalking
+      ? Constants.CHARACTER_STATE_WALKING
+      : Constants.CHARACTER_STATE_DEFAULT;
   } else if (state.isDesiringItem) {
     return Constants.CHARACTER_STATE_DESIRING;
   } else if (state.isWalking) {
     return Constants.CHARACTER_STATE_WALKING;
-  }else if (state.isThirsty) {
+  } else if (state.isThirsty) {
     return Constants.CHARACTER_STATE_THIRSTY;
   } else {
     return Constants.CHARACTER_STATE_DEFAULT;
@@ -37,22 +38,27 @@ class MainView extends React.Component {
           data={this.props.homeProvider.state}
         />
 
-        {/* TODO: zindex 이슈로 넣으면 클릭이안됨 */}
-        <View
-          style={{
-            position: "absolute",
-            bottom: 30,
-            left: 10
-          }}
-        >
+        <View style={{ position: "absolute", bottom: 0 }}>
+          <Image source={require("./assets/black_box.png")}></Image>
           <Text
-            style={{ color: "#fff", fontSize: 20, fontFamily: "DungGeunMo" }}
+            style={{
+              color: "#fff",
+              fontSize: 20,
+              fontFamily: "DungGeunMo",
+              position: "absolute",
+              top: 15,
+              left: 30,
+              lineHeight: 30
+            }}
           >
-            어쩌구저쩌구
-            {this.props.homeProvider.state.message}
+            {this.props.homeProvider.state.message.map(e => (
+              <>
+                {e}
+                {"\n"}
+              </>
+            ))}
           </Text>
         </View>
-        {/* <DescriptionArea></DescriptionArea> */}
       </>
     );
   };
