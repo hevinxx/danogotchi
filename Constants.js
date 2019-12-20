@@ -1,4 +1,4 @@
-export const MAX_DISTANCE = 50;
+export const MAX_DISTANCE = 30;
 
 export const MAX_LOVE_POINT = 200;
 export const THRESHOLD_BEST = 200;
@@ -11,9 +11,9 @@ export const BORN = 2;
 
 export const HATCHING_MILLISECONDS = 1000;
 export const WALKING_STOPPER_MILLISECONDS = 3000;
-export const GET_THIRSTY_MILLISECONDS = 500;
+export const GET_THIRSTY_MILLISECONDS = 5000;
 export const DRINK_STOPPER_MILLISECONDS = 3000;
-export const DESIRE_ITEM_MILLISECONDS = 8000;
+export const DESIRE_ITEM_MILLISECONDS = 5000;
 export const HAPPY_STOPPER_MILLISECONDS = 2000;
 export const EVOLVE_STOPPER_MILLISECONDS = 3000;
 

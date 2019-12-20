@@ -272,7 +272,7 @@ class MainArea extends Component {
             {characterState === CHARACTER_STATE_DESIRING &&
             !this.props.data.isGoing ? (
               <View style={styles.bubbleContainer}>
-                <Image source={require("./assets/want_03_proteinchoco.png")} />
+                <Image source={require("./assets/want_02_bean.png")} />
               </View>
             ) : characterState === CHARACTER_STATE_THIRSTY
             && !this.props.data.isGoing ? (
